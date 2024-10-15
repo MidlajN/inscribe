@@ -3,8 +3,7 @@
 /* eslint-disable react/prop-types */
 import { createContext, useContext, useEffect, useRef, useState, useCallback } from "react";
 import { handleKeyDown } from "./functions";
-import { Canvas, util, Path, BaseFabricObject, FabricObject, InteractiveFabricObject} from "fabric";
-// import 'fabric-history';
+import { Canvas, util, Path, FabricObject, Rect } from "fabric";
 
 
 const CanvasContext = createContext(null);
@@ -21,12 +20,14 @@ export const CanvasProvider = ({ children }) => {
     
 
     useEffect(() => {
-        // FabricObject.prototype.cornerStyle = 'circle';
-        // FabricObject.prototype.cornerColor = '#7f77eb85';
-        // FabricObject.prototype.transparentCorners = false;
-        // FabricObject.prototype.cornerSize = 15;
-        // FabricObject.prototype.borderScaleFactor = 3;
-        // FabricObject.prototype.noScaleCache = true;
+        FabricObject.ownDefaults.cornerStyle = 'circle';
+        // FabricObject.ownDefaults.cornerColor = '#7f77eb85';
+        FabricObject.ownDefaults.transparentCorners = false;
+        // FabricObject.ownDefaults.cornerSize = 10;
+        FabricObject.ownDefaults.co
+        FabricObject.ownDefaults.borderScaleFactor = 3;
+        FabricObject.ownDefaults.noScaleCache = true;
+        FabricObject.ownDefaults.borderDashArray = [10];
 
         const fabricCanvas = new Canvas(canvasRef.current, {
             width: util.parseUnit('210mm'),
@@ -35,9 +36,25 @@ export const CanvasProvider = ({ children }) => {
             fireRightClick: true,
             stopContextMenu: true,
             centeredRotation: true,
-            selection: false,
+            // selection: false,
         });
 
+        // const rect = new Rect({
+        //     left: 100,
+        //     top: 100,
+        //     width: 60,
+        //     height: 70,
+        //     fill: 'red',
+        //     cornerStyle: 'circle',
+        //     cornerColor: '#7f77eb85',
+        //     transparentCorners: false,
+        //     cornerSize: 15,
+        //     borderScaleFactor: 3,
+        //     noScaleCache: true
+        //   });
+          
+        //   fabricCanvas.add(rect);
+          
         fabricCanvas.renderAll()
 
         setCanvas(fabricCanvas);

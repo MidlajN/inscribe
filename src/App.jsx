@@ -26,24 +26,15 @@ function App() {
         {/*  ---------- Canvas ---------- */}
         <section className='p-4 bg-slate-100 flex-1 overflow-hidden'>
           <TransformWrapper
-            // initialScale={1} 
-            // maxScale={1}
-            // minScale={.3}
-            // limitToBounds={ false }
+            centerOnInit  
             panning={{ excluded: ['fabricCanvas'] }}
-            // velocityAnimation={{ disabled: true }}
-            // onPanningStart={handlePanStart}
           >
             <TransformComponent
-              // contentStyle={{  margin:'auto'}} 
+              contentStyle={{ display: 'flex'}} 
               wrapperStyle={{  
                 width: '100%', 
                 height: '100%', 
-                // overflow:'visible', 
-                // display:'flex', 
-                // alignContent: 'center', 
-                // alignItems: 'center', 
-                // justifyContent: 'center' 
+                overflow:'visible', 
               }}
             >
               <div className='w-fit shadow-lg m-auto border'>
@@ -82,7 +73,9 @@ function SetUp() {
       return () => { 
         canvas.isDrawingMode = false; 
       };
-    }
+    } 
+    
+
   }, [canvas, stroke, tool]);
 
   const uploadToMachine = async (gcode) => {
