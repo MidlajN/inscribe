@@ -1,5 +1,5 @@
 import './App.css'
-import { Logo, Pen, Eraser, ArrowLeft } from './icons'
+import { Logo, Pen, Eraser, ArrowLeft, Pan } from './icons'
 import useCanvas, { useCom } from './context'
 import { useEffect, useState } from 'react';
 import { PencilBrush } from 'fabric';
@@ -7,37 +7,50 @@ import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 import { convertToGcode, returnGroupedObjects, returnSvgElements, sortSvgElements } from './convert';
 
 
-
 function App() { 
   const { canvasRef } = useCanvas();
+  const [ pan, setPan ] = useState(false);
 
   return (
     <>
-      <div className='flex flex-col h-screen'>
+      <div className='flex flex-col bg-slate-100 h-screen overflow-hidden'>
       
         {/* ---------- Navbar ---------- */}
-        <section className='navbar'>
+        <section className='navbar z-50'>
           <Logo width={138} height={32}/>
+          <SetUp pan={pan} setPan={setPan} />
         </section>
 
-        {/*  ---------- Tools ---------- */}
-        <SetUp />
-
+        
         {/*  ---------- Canvas ---------- */}
-        <section className='p-4 bg-slate-100 flex-1 overflow-hidden'>
+        <section 
+          className='canvas-container' 
+        >
           <TransformWrapper
-            centerOnInit  
+            // initialScale={0.6} 
+            maxScale={1}
+            minScale={.3} 
+            limitToBounds={ !pan }
             panning={{ excluded: ['fabricCanvas'] }}
+            centerOnInit 
+            centerZoomedOut={false}
+            // disablePadding
+            // disabled={!twoFingerMode}
           >
             <TransformComponent
-              contentStyle={{ display: 'flex'}} 
+              contentStyle={{ 
+                // display: 'flex',
+                margin: '1rem' 
+              }} 
               wrapperStyle={{  
-                width: '100%', 
-                height: '100%', 
+                width: '100dvw',
+                height: '100dvh',
                 overflow:'visible', 
+                // display:'flex', 
+                // left:'8vw', 
               }}
             >
-              <div className='w-fit shadow-lg m-auto border'>
+              <div className=' w-full h-full shadow-lg m-auto border'>
                 <canvas ref={ canvasRef } className="fabricCanvas"></canvas>
               </div>
             </TransformComponent>
@@ -48,7 +61,8 @@ function App() {
   )
 }
 
-function SetUp() {
+// eslint-disable-next-line react/prop-types
+function SetUp({ pan, setPan }) {
   const { colors, config } = useCom();
   const { canvas } = useCanvas();
 
@@ -73,10 +87,17 @@ function SetUp() {
       return () => { 
         canvas.isDrawingMode = false; 
       };
-    } 
-    
+    }
 
-  }, [canvas, stroke, tool]);
+    console.log('Pan :: ', pan);
+    
+    if (tool === 'Pan') {
+      setPan(true);
+    } else {
+      setPan(false);
+    }
+
+  }, [canvas, setPan, stroke, tool]);
 
   const uploadToMachine = async (gcode) => {
     const blob = new Blob([gcode.join('\n')], { type: 'text/plain '});
@@ -109,8 +130,8 @@ function SetUp() {
 
   return (
     <>
-      <section className='border-b relative lg:w-full max-w-[1280px] m-auto'>
-        <div className='flex justify-center items-center gap-4 p-3'>
+      {/* <section className='relative lg:w-full max-w-[1280px] m-auto'> */}
+        <div className='setup'>
           <div
             className='p-0.5'
             style={{ borderBottom: tool === 'Pen' ? '2px solid #ff965b' : null}}
@@ -128,6 +149,15 @@ function SetUp() {
             }}
             >
             <Eraser width={25} height={25}/>
+          </div>
+          <div 
+            className='p-0.5'
+            style={{ borderBottom: tool === 'Pan' ? '2px solid #ff965b' : null}}
+            onClick={() => {
+              setTool('Pan');
+            }}
+            >
+            <Pan width={25} height={25} />
           </div>
           { colors.map((color, index) => (
             <div 
@@ -147,7 +177,7 @@ function SetUp() {
         </div>
 
         <div 
-          className='bg-[#0E505C] w-fit flex items-center justify-between gap-4 rounded-full absolute right-5 top-3' 
+          className='bg-[#0E505C] w-fit flex items-center justify-between gap-4 rounded-full' 
           onClick={plot}
         >
           <p className='text-white text-sm font-bold indent-5 tracking-wide'>Print Now</p>
@@ -155,7 +185,7 @@ function SetUp() {
             <ArrowLeft width={8} height={8} />
           </div>
         </div>
-      </section>
+      {/* </section> */}
     </>
   )
 }

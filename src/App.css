@@ -3,5 +3,27 @@
   width: 100%;
   margin: 0 auto;
   padding: 1.5rem 2rem;
-  border-bottom: 1px solid #4f4f4f1c;
+  /* border-bottom: 1px solid #4f4f4f1c; */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.navbar .setup {
+  background: white;
+  padding: 0.7rem 1.5rem;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  border: 1px solid #64646428;
+}
+
+.canvas-container {
+  position: absolute;
+  top: 0;
+  height: 100dvh;
+  width: 100dvw;
+  overflow: hidden;
+  /* padding: 1rem; */
 }

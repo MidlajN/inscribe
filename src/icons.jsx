@@ -116,3 +116,22 @@ export const ArrowLeft = (props) => (
     />
   </svg>
 );
+
+
+export const Pan = (props) => (
+  <svg
+    width={18}
+    height={18}
+    viewBox="0 0 18 18"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M9.83341 10.6666V14H11.5001L9.00008 17.3333L6.50008 14H8.16675V10.6666H9.83341ZM14.0001 6.49996L17.3334 8.99996L14.0001 11.5V9.83329H10.6667V8.16663H14.0001V6.49996ZM4.00008 6.49996V8.16663H7.33341V9.83329H4.00008V11.5L0.666748 8.99996L4.00008 6.49996ZM9.00008 0.666626L11.5001 3.99996H9.83341V7.33329H8.16675V3.99996H6.50008L9.00008 0.666626Z"
+      fill="black"
+    />
+  </svg>
+);

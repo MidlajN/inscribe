@@ -30,8 +30,8 @@ export const CanvasProvider = ({ children }) => {
         FabricObject.ownDefaults.borderDashArray = [10];
 
         const fabricCanvas = new Canvas(canvasRef.current, {
-            width: util.parseUnit('210mm'),
-            height: util.parseUnit('149mm'),
+            width: util.parseUnit('420mm'),
+            height: util.parseUnit('297mm'),
             backgroundColor: 'white',
             fireRightClick: true,
             stopContextMenu: true,
