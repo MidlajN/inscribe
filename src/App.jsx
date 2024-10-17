@@ -2,10 +2,9 @@ import './App.css'
 import { Logo, Pen, Eraser, ArrowLeft, Pan } from './icons'
 import useCanvas, { useCom } from './context'
 import { useEffect, useState } from 'react';
-import { PencilBrush } from 'fabric';
+import { PencilBrush,  } from 'fabric';
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 import { convertToGcode, returnGroupedObjects, returnSvgElements, sortSvgElements } from './convert';
-
 
 function App() { 
   const { canvasRef } = useCanvas();
@@ -17,8 +16,11 @@ function App() {
       
         {/* ---------- Navbar ---------- */}
         <section className='navbar z-50'>
-          <Logo width={138} height={32}/>
+          <div className='bg-white px-4 py-[0.65rem] rounded-xl'>
+            <Logo width={138} height={32}/>
+          </div>
           <SetUp pan={pan} setPan={setPan} />
+          {/* <SetUp /> */}
         </section>
 
         
@@ -27,20 +29,20 @@ function App() {
           className='canvas-container' 
         >
           <TransformWrapper
-            // initialScale={0.6} 
+            initialScale={0.75} 
             maxScale={1}
             minScale={.3} 
-            limitToBounds={ !pan }
+            // limitToBounds={ !pan }
             panning={{ excluded: ['fabricCanvas'] }}
             centerOnInit 
-            centerZoomedOut={false}
+            // centerZoomedOut={false}
             // disablePadding
-            // disabled={!twoFingerMode}
+            disabled={ !pan }
           >
             <TransformComponent
               contentStyle={{ 
                 // display: 'flex',
-                margin: '1rem' 
+                // margin: '1rem' 
               }} 
               wrapperStyle={{  
                 width: '100dvw',
@@ -61,43 +63,32 @@ function App() {
   )
 }
 
+export default App
+
+
+
 // eslint-disable-next-line react/prop-types
 function SetUp({ pan, setPan }) {
-  const { colors, config } = useCom();
+  const { colors, config, openSocket, job, setResponse } = useCom();
   const { canvas } = useCanvas();
 
   const [ stroke, setStroke ] = useState('#000000');
   const [ tool, setTool ] = useState('Pen');
 
-  useEffect(() => {
+  useEditorSetup({ 
+    stroke: stroke,
+    tool: tool,
+    pan: pan,
+    setPan: setPan
+  });
+
+  useEffect(() => { 
     if (!canvas) return;
-    
-    // canvas.getObjects().forEach(obj => {
-    //   obj.set({
-    //     selectable: false
-    //   });
-    // });
-
-    if (tool === 'Pen') {
-      canvas.isDrawingMode = true;
-      canvas.freeDrawingBrush = new PencilBrush(canvas);
-      canvas.freeDrawingBrush.color = stroke;
-      canvas.freeDrawingBrush.width = 3;
-
-      return () => { 
-        canvas.isDrawingMode = false; 
-      };
+    setResponse({ pageId: 1, message: ''})
+    if (!job.connected) {
+      openSocket() 
     }
-
-    console.log('Pan :: ', pan);
-    
-    if (tool === 'Pan') {
-      setPan(true);
-    } else {
-      setPan(false);
-    }
-
-  }, [canvas, setPan, stroke, tool]);
+  }, [canvas, job.connected, openSocket, setResponse])
 
   const uploadToMachine = async (gcode) => {
     const blob = new Blob([gcode.join('\n')], { type: 'text/plain '});
@@ -190,4 +181,48 @@ function SetUp({ pan, setPan }) {
   )
 }
 
-export default App
+const useEditorSetup= ({stroke, tool, pan, setPan}) => {
+  const { canvas } = useCanvas();
+
+  useEffect(() => {
+    if (!canvas) return;
+
+    canvas.getObjects().forEach(obj => {
+      obj.set({
+        selectable: pan
+      })
+    });
+    
+    if (tool === 'Pen') {
+      canvas.isDrawingMode = true;
+      canvas.freeDrawingBrush = new PencilBrush(canvas);
+      canvas.freeDrawingBrush.color = stroke;
+      canvas.freeDrawingBrush.width = 3;
+
+      return () => { 
+        canvas.isDrawingMode = false; 
+      };
+    } else if (tool === 'Eraser') {
+      canvas.selection = false;
+
+      const handleEraser = (event) => {
+        const pointer = canvas.getPointer(event.e);
+        const target = canvas.findTarget(pointer, true)
+        if (target) {
+          console.log('Object is Intersecting :: ', target);
+          if (target.name !== 'ToolHead') {
+            canvas.remove(target);
+            canvas.renderAll();
+          }
+        }
+      }
+
+      canvas.on('mouse:move', handleEraser);
+      return () => canvas.off('mouse:move', handleEraser);
+
+    } else {
+      canvas.selection = true;
+      setPan(true);
+    }
+  }, [canvas, pan, setPan, stroke, tool]);
+}

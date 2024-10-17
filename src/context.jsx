@@ -3,7 +3,7 @@
 /* eslint-disable react/prop-types */
 import { createContext, useContext, useEffect, useRef, useState, useCallback } from "react";
 import { handleKeyDown } from "./functions";
-import { Canvas, util, Path, FabricObject, Rect } from "fabric";
+import { Canvas, util, Path, FabricObject,  } from "fabric";
 
 
 const CanvasContext = createContext(null);
@@ -148,7 +148,7 @@ export const CommunicationProvider = ({ children }) => {
     ]);
     const [ config, setConfig ] = useState({
         // url: window.location.hostname,
-        url: '192.168.0.1',
+        url: 'plotter.local',
         feedRate: 10000,
         jogSpeed: 12000,
         zOffset: 10,
@@ -240,13 +240,13 @@ export const CommunicationProvider = ({ children }) => {
     useEffect(() => {
         if (response.pageId === '') return;
 
-        console.log('Page ID ', response.pageId)
+        console.log('Page ID Recieved :', response.pageId)
         sendToMachine('$H\n$Report/interval=50');
 
-        dotRef.current = new Path('M -50,0 L 50,0 M 0,-50 L 0,50 M -25,-25 V-25,25 H25,25 V25,-25 Z', {
-            stroke: '#2a334e28', 
-            strokeWidth: 8,
-            fill: '#2a334e28',
+        dotRef.current = new Path('M50 25L33.0449 23.598L29 21L26.6495 17.4012L25 0L23.5202 17.4012L21 21L16.9526 23.598L0 25L16.9526 26.7276L21 29.5L23.5203 33.5116L25 50L26.6495 33.4929L29 29.5L33.0449 26.7276L50 25Z', {
+            // stroke: '#2a334e28', 
+            // strokeWidth: 8,
+            fill: '#223265de',
             originX: 'center',
             originY: 'center',
             lockMovementX: true,
@@ -254,7 +254,7 @@ export const CommunicationProvider = ({ children }) => {
             lockScalingX: true,
             lockScalingY: true,
             lockRotation: true,
-            top: 550 * 96 / 25.4,
+            top: 297 * 96 / 25.4,
             left: 0,
             // top: 900,
             // left: 600,
@@ -262,64 +262,6 @@ export const CommunicationProvider = ({ children }) => {
             selectable: false,
             hoverCursor: 'auto'
         });
-
-        let snapped = false;
-
-        canvas.on('object:moving', (e) => {
-
-            const movingObject = e.target;
-            const [ mTopLeft, mTopRight, mBottomRight, mBottomLeft ] = movingObject.getCoords();
-            const dotCenter = dotRef.current.getCenterPoint();
-
-            const calculateDist = (point, centerX, centerY) => {
-                const dx = point.x - centerX;
-                const dy = point.y - centerY;
-                return Math.sqrt(dx * dx + dy * dy);
-            }
-
-            const topLeftDistance = calculateDist(mTopLeft, dotCenter.x, dotCenter.y);
-            const topRightDistance = calculateDist(mTopRight, dotCenter.x, dotCenter.y);
-            const bottomLeftDistance = calculateDist(mBottomLeft, dotCenter.x, dotCenter.y);
-            const bottomRightDistance = calculateDist(mBottomRight, dotCenter.x, dotCenter.y);
-
-            const shortestDistance = Math.min(topLeftDistance, topRightDistance, bottomLeftDistance, bottomRightDistance);
-
-            if (!snapped && shortestDistance < 80) {
-                const horizontalD = mTopRight.x - mTopLeft.x;
-                const verticalD = mBottomLeft.y - mTopLeft.y;
-
-                if (shortestDistance === topLeftDistance) {
-                    movingObject.set({
-                        left: dotCenter.x,
-                        top: dotCenter.y
-                    })
-                }
-                else if (shortestDistance === topRightDistance) {
-                    movingObject.set({
-                        left: dotCenter.x - horizontalD,
-                        top: dotCenter.y
-                    })
-                }
-                else if (shortestDistance === bottomLeftDistance){
-                    movingObject.set({
-                        left: dotCenter.x,
-                        top: dotCenter.y - verticalD
-                    })
-                }
-                else if (shortestDistance === bottomRightDistance) {
-                    movingObject.set({
-                        left: dotCenter.x - horizontalD,
-                        top: dotCenter.y - verticalD
-                    })
-                }  
-                movingObject.setCoords();
-                setTimeout(() => { snapped = true }, 500)
-            } else {
-                setTimeout(() => { snapped = false }, 500)
-            }
-        });
-
-        canvas.on('mouse:up', () => { snapped = false; });
 
         canvas.add(dotRef.current);
         canvas.renderAll();
@@ -360,8 +302,12 @@ export const CommunicationProvider = ({ children }) => {
                     '\nSD Percent : ', sdPercent, ' <-> ', percentage
                 );
 
+                // dotRef.current.set({
+                //     top: (550 - y) * 96 / 25.4,
+                //     left: x * 96 / 25.4,
+                // });
                 dotRef.current.set({
-                    top: (550 - y) * 96 / 25.4,
+                    top: (297 - y) * 96 / 25.4,
                     left: x * 96 / 25.4,
                 });
                 canvas.renderAll();
