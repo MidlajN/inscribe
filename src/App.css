@@ -1,5 +1,9 @@
+#root {
+  background-color: #f1f5f9;
+}
+
 .navbar {
-  max-width: 1280px;
+  
   width: 100%;
   margin: 0 auto;
   padding: 1.5rem 2rem;
@@ -7,16 +11,25 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
-.navbar .setup {
+.setup {
   background: white;
   padding: 0.7rem 1.5rem;
   border-radius: 10px;
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-wrap: wrap;
   gap: 1rem;
   border: 1px solid #64646428;
+  width: fit-content;
+  position: absolute;
+  left: 50%;
+  translate: -50%;
+  top: 1.5rem;
+  z-index: 10;
 }
 
 .canvas-container {

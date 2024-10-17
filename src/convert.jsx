@@ -91,8 +91,16 @@ export const convertToGcode = async (svgElements, colors, config) => {
         cleanedGcodeLines.splice(0, 4);
         cleanedGcodeLines.splice(1, 1);
 
-        return color.command + '\n' + cleanedGcodeLines.join('\n');
+        // return color.command + '\n' + cleanedGcodeLines.join('\n');
+        return cleanedGcodeLines.join('\n');
     }));
 
-    return ['$H', 'G10 L20 P0 X0 Y0 Z0', `G1 F${config.feedRate}`, 'G0 X50Y50\n', ...gcodes, 'G0 X680Y540']
+    return [
+        // '$H', 
+        'G10 L20 P0 X0 Y0 Z0', 
+        `G1 F${config.feedRate}`, 
+        'G0 X50Y50\n', 
+        ...gcodes, 
+        'G0 X680Y540'
+    ]
 }

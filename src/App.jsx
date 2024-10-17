@@ -8,20 +8,21 @@ import { convertToGcode, returnGroupedObjects, returnSvgElements, sortSvgElement
 
 function App() { 
   const { canvasRef } = useCanvas();
+  const { job } = useCom()
   const [ pan, setPan ] = useState(false);
 
   return (
     <>
-      <div className='flex flex-col bg-slate-100 h-screen overflow-hidden'>
+      <div className='flex flex-col h-screen overflow-hidden'>
       
         {/* ---------- Navbar ---------- */}
-        <section className='navbar z-50'>
-          <div className='bg-white px-4 py-[0.65rem] rounded-xl'>
-            <Logo width={138} height={32}/>
+        {/* <section className='navbar z-50'> */}
+          <div className='bg-white px-4 py-[0.65rem] rounded-xl flex items-end absolute left-4 top-5 z-10'>
+            <Logo width={138} height={35}/>
           </div>
           <SetUp pan={pan} setPan={setPan} />
           {/* <SetUp /> */}
-        </section>
+        {/* </section> */}
 
         
         {/*  ---------- Canvas ---------- */}
@@ -59,6 +60,16 @@ function App() {
           </TransformWrapper>
         </section>
       </div>
+
+      <div className='w-52 absolute z-20 bottom-6 right-8 px-4 py-2 border rounded-full flex justify-center items-center gap-3'>
+        <div className="w-[80%] bg-gray-200 rounded-full h-1 overflow-hidden">
+          <div 
+              className="h-full transition-all duration-500" 
+              style={{ width: `40%`, background: '#095D6C' }}
+          />
+        </div>
+        <p className='text-xs font-medium text-[#062f36]'>98%</p>
+      </div>
     </>
   )
 }
@@ -69,7 +80,7 @@ export default App
 
 // eslint-disable-next-line react/prop-types
 function SetUp({ pan, setPan }) {
-  const { colors, config, openSocket, job, setResponse } = useCom();
+  const { colors, config, openSocket, job, setResponse, setJob, sendToMachine } = useCom();
   const { canvas } = useCanvas();
 
   const [ stroke, setStroke ] = useState('#000000');
@@ -86,9 +97,10 @@ function SetUp({ pan, setPan }) {
     if (!canvas) return;
     setResponse({ pageId: 1, message: ''})
     if (!job.connected) {
+      console.log('Not Connected :: connecting....', job)
       openSocket() 
     }
-  }, [canvas, job.connected, openSocket, setResponse])
+  }, [canvas])
 
   const uploadToMachine = async (gcode) => {
     const blob = new Blob([gcode.join('\n')], { type: 'text/plain '});
@@ -103,6 +115,9 @@ function SetUp({ pan, setPan }) {
       });
       const data = await response.json();
       console.log('Request Send Successfully :', data);
+
+      sendToMachine(`[ESP220]/${file.name}`);
+      setJob({ ...job, started:  true});
     } catch  (err) {
       console.log('Error While Uploading : ', err);
     }
@@ -121,62 +136,60 @@ function SetUp({ pan, setPan }) {
 
   return (
     <>
-      {/* <section className='relative lg:w-full max-w-[1280px] m-auto'> */}
-        <div className='setup'>
-          <div
-            className='p-0.5'
-            style={{ borderBottom: tool === 'Pen' ? '2px solid #ff965b' : null}}
-            onClick={() => {
-              setTool('Pen');
-            }}
-            >
-            <Pen width={25} height={25}/>
-          </div>
-          <div 
-            className='p-0.5'
-            style={{ borderBottom: tool === 'Eraser' ? '2px solid #ff965b' : null}}
-            onClick={() => {
-              setTool('Eraser');
-            }}
-            >
-            <Eraser width={25} height={25}/>
-          </div>
-          <div 
-            className='p-0.5'
-            style={{ borderBottom: tool === 'Pan' ? '2px solid #ff965b' : null}}
-            onClick={() => {
-              setTool('Pan');
-            }}
-            >
-            <Pan width={25} height={25} />
-          </div>
-          { colors.map((color, index) => (
-            <div 
-              key={index}
-              className='w-6 h-6 rounded-3xl stroke-white'
-              style={{ 
-                backgroundColor: color.color, 
-                border: '2px solid white', 
-                boxShadow: stroke === color.color ? '#ff965b 0px 0px 1px 3px' : null 
-              }}
-              onClick={() => {
-                setStroke(color.color);
-              }}
-            >
-            </div>
-          ))}
+      <div className='setup'>
+        <div
+          className='p-0.5'
+          style={{ borderBottom: tool === 'Pen' ? '2px solid #ff965b' : null}}
+          onClick={() => {
+            setTool('Pen');
+          }}
+          >
+          <Pen width={25} height={25}/>
         </div>
-
         <div 
-          className='bg-[#0E505C] w-fit flex items-center justify-between gap-4 rounded-full' 
-          onClick={plot}
-        >
-          <p className='text-white text-sm font-bold indent-5 tracking-wide'>Print Now</p>
-          <div className='bg-[#095D6C] p-3 rounded-r-full hover:rounded-full transition-all duration-500'>
-            <ArrowLeft width={8} height={8} />
-          </div>
+          className='p-0.5'
+          style={{ borderBottom: tool === 'Eraser' ? '2px solid #ff965b' : null}}
+          onClick={() => {
+            setTool('Eraser');
+          }}
+          >
+          <Eraser width={25} height={25}/>
         </div>
-      {/* </section> */}
+        <div 
+          className='p-0.5'
+          style={{ borderBottom: tool === 'Pan' ? '2px solid #ff965b' : null}}
+          onClick={() => {
+            setTool('Pan');
+          }}
+          >
+          <Pan width={25} height={25} />
+        </div>
+        { colors.map((color, index) => (
+          <div 
+            key={index}
+            className='w-6 h-6 rounded-3xl stroke-white'
+            style={{ 
+              backgroundColor: color.color, 
+              border: '2px solid white', 
+              boxShadow: stroke === color.color ? '#ff965b 0px 0px 1px 3px' : null 
+            }}
+            onClick={() => {
+              setStroke(color.color);
+            }}
+          >
+          </div>
+        ))}
+      </div>
+
+      <div 
+        className='bg-[#0E505C] w-fit flex items-center justify-between gap-4 rounded-full absolute right-8 top-9 z-10' 
+        onClick={plot}
+      >
+        <p className='text-white text-sm font-bold indent-5 tracking-wide'>Print Now</p>
+        <div className='bg-[#095D6C] p-3 rounded-r-full hover:rounded-full transition-all duration-500'>
+          <ArrowLeft width={8} height={8} />
+        </div>
+      </div>
     </>
   )
 }
@@ -186,6 +199,7 @@ const useEditorSetup= ({stroke, tool, pan, setPan}) => {
 
   useEffect(() => {
     if (!canvas) return;
+    setPan(false)
 
     canvas.getObjects().forEach(obj => {
       obj.set({
@@ -218,11 +232,30 @@ const useEditorSetup= ({stroke, tool, pan, setPan}) => {
       }
 
       canvas.on('mouse:move', handleEraser);
-      return () => canvas.off('mouse:move', handleEraser);
+      canvas.on('mouse:down',  handleEraser);
+      return () => {
+        canvas.off('mouse:move', handleEraser);
+        canvas.off('mouse:down', handleEraser)
+      };
 
     } else {
       canvas.selection = true;
       setPan(true);
     }
-  }, [canvas, pan, setPan, stroke, tool]);
+
+    canvas.renderAll()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canvas, tool, stroke, pan]);
+
+
+  useEffect(() => {
+    if (!canvas) return;
+
+    canvas.getActiveObjects().forEach(obj => {
+      obj.set({
+        stroke: stroke
+      })
+    })
+    canvas.renderAll()
+  }, [canvas, stroke])
 }
