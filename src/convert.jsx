@@ -77,7 +77,13 @@ export const convertToGcode = async (svgElements, colors, config) => {
             feedRate: config.feedRate,
             seekRate: config.seekRate,
             zValue: color.zValue,
-            tolerance: 0.1
+            tolerance: 0.1,
+            ignoreNegative: true,
+            minimumArea: 2.5,
+            bedSize: {
+                width: 420,
+                height: 297
+            }
         }
 
         console.log('Element From to convertToGcode : ', element.svg)
@@ -96,11 +102,11 @@ export const convertToGcode = async (svgElements, colors, config) => {
     }));
 
     return [
-        // '$H', 
+        '$H', 
         'G10 L20 P0 X0 Y0 Z0', 
         `G1 F${config.feedRate}`, 
         'G0 X50Y50\n', 
         ...gcodes, 
-        'G0 X680Y540'
+        'G0 X700Y450'
     ]
 }

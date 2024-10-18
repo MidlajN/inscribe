@@ -1,30 +1,34 @@
 import './App.css'
-import { Logo, Pen, Eraser, ArrowLeft, Pan } from './icons'
+import { Logo, Pen, Eraser, ArrowLeft, Pan, ArrowUp, Home, Cross, Report } from './icons'
 import useCanvas, { useCom } from './context'
-import { useEffect, useState } from 'react';
+import { useEffect, useState , useRef } from 'react';
 import { PencilBrush,  } from 'fabric';
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 import { convertToGcode, returnGroupedObjects, returnSvgElements, sortSvgElements } from './convert';
 
 function App() { 
   const { canvasRef } = useCanvas();
-  const { job } = useCom()
+  const { job, progress, response } = useCom()
   const [ pan, setPan ] = useState(false);
+
+  const textareaRef = useRef(null)
+
+  useEffect(() => {
+    if ( textareaRef.current ) {
+        textareaRef.current.scrollTop = textareaRef.current.scrollHeight;
+    }
+}, [response.message]);
 
   return (
     <>
       <div className='flex flex-col h-screen overflow-hidden'>
       
         {/* ---------- Navbar ---------- */}
-        {/* <section className='navbar z-50'> */}
-          <div className='bg-white px-4 py-[0.65rem] rounded-xl flex items-end absolute left-4 top-5 z-10'>
-            <Logo width={138} height={35}/>
-          </div>
-          <SetUp pan={pan} setPan={setPan} />
-          {/* <SetUp /> */}
-        {/* </section> */}
+        <div className='bg-white px-4 py-[0.65rem] rounded-xl flex items-end absolute left-4 top-5 z-10'>
+          <Logo width={138} height={35}/>
+        </div>
+        <SetUp pan={pan} setPan={setPan} />
 
-        
         {/*  ---------- Canvas ---------- */}
         <section 
           className='canvas-container' 
@@ -36,8 +40,6 @@ function App() {
             // limitToBounds={ !pan }
             panning={{ excluded: ['fabricCanvas'] }}
             centerOnInit 
-            // centerZoomedOut={false}
-            // disablePadding
             disabled={ !pan }
           >
             <TransformComponent
@@ -61,14 +63,55 @@ function App() {
         </section>
       </div>
 
-      <div className='w-52 absolute z-20 bottom-6 right-8 px-4 py-2 border rounded-full flex justify-center items-center gap-3'>
-        <div className="w-[80%] bg-gray-200 rounded-full h-1 overflow-hidden">
-          <div 
-              className="h-full transition-all duration-500" 
-              style={{ width: `40%`, background: '#095D6C' }}
-          />
+      
+      <div className='absolute z-20 bottom-6 right-8 border-[#095d6c3d] border rounded-xl overflow-hidden'>
+        <div className='machineMsg'>
+          <textarea 
+            ref={textareaRef} 
+            value={ response.message } 
+            className="cursor-default lg:pb-8" 
+            readOnly
+          ></textarea> 
+          <div className='flex w-full justify-around py-4 px-2'>
+              <div className='rounded-full  border border-slate-300 p-3'>
+                <Home width={18} height={18} />
+              </div>
+              <div className='rounded-full border border-slate-300 p-3'>
+                <Cross width={18} height={18} />
+              </div>
+              <div className='rounded-full border border-slate-300 p-3'>
+                <Report width={18} height={18} />
+              </div>
+
+          </div>
         </div>
-        <p className='text-xs font-medium text-[#062f36]'>98%</p>
+        <div className=' flex justify-around items-center py-2'>
+          <div className='pr-4 pl-5 border-r border-[#095d6c3d] hover:border-[#6c36093d] cursor-pointer'>
+            <ArrowUp width={20} height={20} />
+          </div>
+          <div className='min-w-52 flex justify-center items-center gap-3'>
+              { job.started ? (
+                <>
+                  <div className="w-[80%] bg-gray-200 rounded-full h-1 overflow-hidden">
+                    <div 
+                        className="h-full transition-all duration-500" 
+                        style={{ width: `${progress.progress}%`, background: '#095D6C' }}
+                    />
+                  </div>
+                  <p className='text-xs font-medium text-[#062f36]'>{progress.progress}%</p>
+                </>
+              ): (
+                <>
+                  <p 
+                    className='text-sm font-medium cursor-defaul'
+                    style={{ color: job.connected ? '#062f36' : job.connecting ? '#0368db' : '#6c0909' }}
+                  >
+                    { job.connected ? 'Connected' : job.connecting ? 'Connecting...' : 'Connection Failed'}
+                  </p>
+                </>
+              )}
+          </div>
+        </div>
       </div>
     </>
   )
@@ -80,7 +123,7 @@ export default App
 
 // eslint-disable-next-line react/prop-types
 function SetUp({ pan, setPan }) {
-  const { colors, config, openSocket, job, setResponse, setJob, sendToMachine } = useCom();
+  const { colors, config, openSocket, job, setJob, sendToMachine, ws } = useCom();
   const { canvas } = useCanvas();
 
   const [ stroke, setStroke ] = useState('#000000');
@@ -94,13 +137,12 @@ function SetUp({ pan, setPan }) {
   });
 
   useEffect(() => { 
-    if (!canvas) return;
-    setResponse({ pageId: 1, message: ''})
+    if (ws) return;
     if (!job.connected) {
       console.log('Not Connected :: connecting....', job)
-      openSocket() 
+      openSocket()
     }
-  }, [canvas])
+  }, [ws, job, openSocket])
 
   const uploadToMachine = async (gcode) => {
     const blob = new Blob([gcode.join('\n')], { type: 'text/plain '});
@@ -127,6 +169,7 @@ function SetUp({ pan, setPan }) {
     const groupedObjects = returnGroupedObjects(canvas);
     const svgElements = returnSvgElements(groupedObjects, canvas.getWidth(), canvas.getHeight());
     sortSvgElements(svgElements, colors);
+    console.log(svgElements);
 
     const gcodes = await convertToGcode(svgElements, colors, config);
     console.log('Generated G-Code : ', gcodes.join('\n'));

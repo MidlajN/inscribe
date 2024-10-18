@@ -139,7 +139,7 @@ export const CommunicationProvider = ({ children }) => {
     const [colors, setColors] = useState([
         { color: '#ff0000', name: 'Red', zValue: -9, command: "G6.1" },
         { color: '#ffa500', name: 'Orange', zValue: -9.8, command: "G6.6" },
-        { color: '#000000', name: 'Black', zValue: -10.2, command: "G6.7" },
+        { color: '#000000', name: 'Black', zValue: -32.5, command: "G6.7" },
         { color: '#227fe3', name: 'Blue', zValue: -9.8, command: "G6.5" },
         { color: '#ffff00', name: 'Yellow', zValue: -9.5, command: "G6.3" },
         { color: '#008000', name: 'Green', zValue: -9.9, command: "G6.4" },
@@ -149,7 +149,7 @@ export const CommunicationProvider = ({ children }) => {
     const [ config, setConfig ] = useState({
         // url: window.location.hostname,
         url: 'plotter.local',
-        feedRate: 10000,
+        feedRate: 4000,
         jogSpeed: 12000,
         zOffset: 10,
         open: false

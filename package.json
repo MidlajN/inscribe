@@ -14,7 +14,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-zoom-pan-pinch": "^3.6.1",
-    "svg-to-gcode": "^1.2.10",
+    "svg-to-gcode": "^1.3.0",
     "tinycolor2": "^1.1.1"
   },
   "devDependencies": {
