@@ -8,16 +8,7 @@ import { convertToGcode, returnGroupedObjects, returnSvgElements, sortSvgElement
 
 function App() { 
   const { canvasRef } = useCanvas();
-  const { job, progress, response } = useCom()
   const [ pan, setPan ] = useState(false);
-
-  const textareaRef = useRef(null)
-
-  useEffect(() => {
-    if ( textareaRef.current ) {
-        textareaRef.current.scrollTop = textareaRef.current.scrollHeight;
-    }
-}, [response.message]);
 
   return (
     <>
@@ -37,22 +28,15 @@ function App() {
             initialScale={0.75} 
             maxScale={1}
             minScale={.3} 
-            // limitToBounds={ !pan }
             panning={{ excluded: ['fabricCanvas'] }}
             centerOnInit 
             disabled={ !pan }
           >
             <TransformComponent
-              contentStyle={{ 
-                // display: 'flex',
-                // margin: '1rem' 
-              }} 
               wrapperStyle={{  
                 width: '100dvw',
                 height: '100dvh',
                 overflow:'visible', 
-                // display:'flex', 
-                // left:'8vw', 
               }}
             >
               <div className=' w-full h-full shadow-lg m-auto border'>
@@ -63,56 +47,7 @@ function App() {
         </section>
       </div>
 
-      
-      <div className='absolute z-20 bottom-6 right-8 border-[#095d6c3d] border rounded-xl overflow-hidden'>
-        <div className='machineMsg'>
-          <textarea 
-            ref={textareaRef} 
-            value={ response.message } 
-            className="cursor-default lg:pb-8" 
-            readOnly
-          ></textarea> 
-          <div className='flex w-full justify-around py-4 px-2'>
-              <div className='rounded-full  border border-slate-300 p-3'>
-                <Home width={18} height={18} />
-              </div>
-              <div className='rounded-full border border-slate-300 p-3'>
-                <Cross width={18} height={18} />
-              </div>
-              <div className='rounded-full border border-slate-300 p-3'>
-                <Report width={18} height={18} />
-              </div>
-
-          </div>
-        </div>
-        <div className=' flex justify-around items-center py-2'>
-          <div className='pr-4 pl-5 border-r border-[#095d6c3d] hover:border-[#6c36093d] cursor-pointer'>
-            <ArrowUp width={20} height={20} />
-          </div>
-          <div className='min-w-52 flex justify-center items-center gap-3'>
-              { job.started ? (
-                <>
-                  <div className="w-[80%] bg-gray-200 rounded-full h-1 overflow-hidden">
-                    <div 
-                        className="h-full transition-all duration-500" 
-                        style={{ width: `${progress.progress}%`, background: '#095D6C' }}
-                    />
-                  </div>
-                  <p className='text-xs font-medium text-[#062f36]'>{progress.progress}%</p>
-                </>
-              ): (
-                <>
-                  <p 
-                    className='text-sm font-medium cursor-defaul'
-                    style={{ color: job.connected ? '#062f36' : job.connecting ? '#0368db' : '#6c0909' }}
-                  >
-                    { job.connected ? 'Connected' : job.connecting ? 'Connecting...' : 'Connection Failed'}
-                  </p>
-                </>
-              )}
-          </div>
-        </div>
-      </div>
+      <Configs /> 
     </>
   )
 }
@@ -225,12 +160,81 @@ function SetUp({ pan, setPan }) {
       </div>
 
       <div 
-        className='bg-[#0E505C] w-fit flex items-center justify-between gap-4 rounded-full absolute right-8 top-9 z-10' 
-        onClick={plot}
+        className='group bg-[#0E505C] w-fit flex items-center justify-between gap-4 rounded-full absolute right-8 top-9 z-10 cursor-pointer ' 
+        onClick={() => { if (ws) plot() }}
       >
         <p className='text-white text-sm font-bold indent-5 tracking-wide'>Print Now</p>
-        <div className='bg-[#095D6C] p-3 rounded-r-full hover:rounded-full transition-all duration-500'>
+        <div className='bg-[#095D6C] p-3 rounded-r-full group-hover:rounded-full transition-all duration-500'>
           <ArrowLeft width={8} height={8} />
+        </div>
+      </div>
+    </>
+  )
+}
+
+const Configs = () => {
+  const [ open, setOpen ] = useState(true);
+  const { job, response, sendToMachine } = useCom()
+
+  const textareaRef = useRef(null)
+
+  useEffect(() => {
+    if ( textareaRef.current ) {
+        textareaRef.current.scrollTop = textareaRef.current.scrollHeight;
+    }
+  }, [response.message]);
+
+  return (
+    <>
+      <div className='absolute z-20 bottom-6 right-8 border-[#095d6c3d] bg-white border rounded-xl overflow-hidden'>
+        <div 
+          className='machineMsg overflow-hidden transition-all duration-500'
+          style={{ height: open ? '13rem' : '0rem',}}
+        >
+          <textarea 
+            ref={textareaRef} 
+            value={ response.message } 
+            className="cursor-default lg:pb-8" 
+            readOnly
+          ></textarea> 
+          <div className='buttons'>
+            <div className='p-3' onClick={() => { sendToMachine('$H') }}>
+              <Home width={18} height={18} />
+            </div>
+            <div className='p-3' onClick={() => { sendToMachine('$X') }}>
+              <Cross width={18} height={18} />
+            </div>
+            <div className='p-3' onClick={() => { sendToMachine('$Report/interval=50') }}>
+              <Report width={18} height={18} />
+            </div>
+          </div>
+        </div>
+        <div className=' flex justify-around items-center py-2'>
+          <div className='pr-4 pl-5 border-r border-[#095d6c3d] hover:border-[#6c36093d] cursor-pointer' onClick={() => { setOpen(!open) }}>
+              <ArrowUp width={20} height={20} style={{ rotate: open ? '180deg' : ''}} className={'transition-all duration-500'} />
+          </div>
+          <div className='min-w-52 flex justify-center items-center gap-3 px-3'>
+              { job.started ? (
+                <>
+                  <div className="w-[80%] bg-gray-200 rounded-full h-1 overflow-hidden">
+                    <div 
+                        className="h-full transition-all duration-500" 
+                        style={{ width: `${job.percentage}%`, background: '#095D6C' }}
+                    />
+                  </div>
+                  <p className='text-xs font-medium text-[#062f36]'>{job.percentage}%</p>
+                </>
+              ): (
+                <>
+                  <p 
+                    className='text-sm font-medium cursor-defaul'
+                    style={{ color: job.connected ? '#062f36' : job.connecting ? '#0368db' : '#6c0909' }}
+                  >
+                    { job.connected ? 'Connected' : job.connecting ? 'Connecting...' : 'Connection Failed'}
+                  </p>
+                </>
+              )}
+          </div>
         </div>
       </div>
     </>
@@ -261,6 +265,7 @@ const useEditorSetup= ({stroke, tool, pan, setPan}) => {
       };
     } else if (tool === 'Eraser') {
       canvas.selection = false;
+      let isMouseDown = false;
 
       const handleEraser = (event) => {
         const pointer = canvas.getPointer(event.e);
@@ -274,11 +279,17 @@ const useEditorSetup= ({stroke, tool, pan, setPan}) => {
         }
       }
 
-      canvas.on('mouse:move', handleEraser);
-      canvas.on('mouse:down',  handleEraser);
-      return () => {
-        canvas.off('mouse:move', handleEraser);
-        canvas.off('mouse:down', handleEraser)
+      canvas.on('mouse:down', () => { isMouseDown = true });
+      canvas.on('mouse:up', () => { isMouseDown = false })
+      canvas.on('mouse:move', (event) => {
+        if (isMouseDown) {
+          handleEraser(event)
+        }
+      });
+      return () => { 
+        canvas.off('mouse:move', handleEraser) ;
+        canvas.off('mouse:up');
+        canvas.off('mouse:down');
       };
 
     } else {

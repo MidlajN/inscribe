@@ -97,15 +97,15 @@ export const convertToGcode = async (svgElements, colors, config) => {
         cleanedGcodeLines.splice(0, 4);
         cleanedGcodeLines.splice(1, 1);
 
-        // return color.command + '\n' + cleanedGcodeLines.join('\n');
-        return cleanedGcodeLines.join('\n');
+        return color.penPick.join('\n') + '\n' + cleanedGcodeLines.join('\n') + color.penDrop.join('\n');
+        // return cleanedGcodeLines.join('\n');
     }));
 
     return [
         '$H', 
+        'G0 X0Y0',
         'G10 L20 P0 X0 Y0 Z0', 
-        `G1 F${config.feedRate}`, 
-        'G0 X50Y50\n', 
+        `G1 F${config.feedRate} `, 
         ...gcodes, 
         'G0 X700Y450'
     ]

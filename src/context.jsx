@@ -15,19 +15,17 @@ export default function useCanvas() {
 export const CanvasProvider = ({ children }) => {
     const canvasRef = useRef(null);
     const [ canvas, setCanvas ] = useState(null);
-    const [ objectValues, setObjectValues ] = useState({ x: 0, y: 0, scaleX: 1, scaleY: 1, rotateAngle: 0 });
     const [ copiedObject, setCopiedObject ] = useState(null);
     
-
     useEffect(() => {
         FabricObject.ownDefaults.cornerStyle = 'circle';
-        // FabricObject.ownDefaults.cornerColor = '#7f77eb85';
+        FabricObject.ownDefaults.cornerColor = '#7f77eb85';
         FabricObject.ownDefaults.transparentCorners = false;
-        // FabricObject.ownDefaults.cornerSize = 10;
-        FabricObject.ownDefaults.co
-        FabricObject.ownDefaults.borderScaleFactor = 3;
+        FabricObject.ownDefaults.cornerSize = 5;
+        FabricObject.ownDefaults.borderScaleFactor = 2;
         FabricObject.ownDefaults.noScaleCache = true;
         FabricObject.ownDefaults.borderDashArray = [10];
+        FabricObject.ownDefaults.lockRotation = true;
 
         const fabricCanvas = new Canvas(canvasRef.current, {
             width: util.parseUnit('420mm'),
@@ -36,24 +34,7 @@ export const CanvasProvider = ({ children }) => {
             fireRightClick: true,
             stopContextMenu: true,
             centeredRotation: true,
-            // selection: false,
         });
-
-        // const rect = new Rect({
-        //     left: 100,
-        //     top: 100,
-        //     width: 60,
-        //     height: 70,
-        //     fill: 'red',
-        //     cornerStyle: 'circle',
-        //     cornerColor: '#7f77eb85',
-        //     transparentCorners: false,
-        //     cornerSize: 15,
-        //     borderScaleFactor: 3,
-        //     noScaleCache: true
-        //   });
-          
-        //   fabricCanvas.add(rect);
           
         fabricCanvas.renderAll()
 
@@ -61,62 +42,14 @@ export const CanvasProvider = ({ children }) => {
         return () => fabricCanvas.dispose();
     }, []);
 
-
-    useEffect(() => {
-        if (canvas === null) return;
-
-        canvas.on('object:modified', () => {
-            const activeObject = canvas.getActiveObject();
-
-            if (activeObject) {
-                const x = parseFloat(activeObject.left.toFixed(2));
-                const y = parseFloat(activeObject.top.toFixed(2));
-                const scaleX = parseFloat(activeObject.scaleX.toFixed(2));
-                const scaleY = parseFloat(activeObject.scaleY.toFixed(2));
-                const angle = parseFloat(activeObject.angle.toFixed(2));
-
-                setObjectValues({ x: x, y: y, scaleX: scaleX, scaleY: scaleY, rotateAngle: angle });
-            }
-        });
-
-        return () => {
-            canvas.off('object:modified');
-        }
-    }, [canvas, objectValues]);
-
-    useEffect(() => {
-        if (!canvas) return;
-        const activeObject = canvas.getActiveObject();
-
-        if (activeObject) {
-            activeObject.set({
-                left: objectValues.x, 
-                top: objectValues.y, 
-                scaleX: objectValues.scaleX, 
-                scaleY: objectValues.scaleY, 
-                angle: objectValues.rotateAngle
-            })
-            canvas.renderAll();
-        }
-    }, [canvas, objectValues]);
-
     useEffect(() => {
         window.addEventListener('keydown', handleKeyDown( copiedObject, setCopiedObject, canvas ));
+        return () => window.removeEventListener('keydown', handleKeyDown);
 
-        return () => { 
-            window.removeEventListener('keydown', handleKeyDown);
-        };
     }, [canvas, copiedObject]);
 
     return (
-        <CanvasContext.Provider 
-            value={{ 
-                canvas, 
-                canvasRef, 
-                objectValues, 
-                setObjectValues, 
-            }}
-        >
+        <CanvasContext.Provider value={{ canvas, canvasRef }}>
             { children }
         </CanvasContext.Provider>
     );
@@ -132,26 +65,74 @@ export function useCom() {
 export const CommunicationProvider = ({ children }) => {
     const { canvas } = useCanvas()
     const [ response, setResponse ] = useState({ pageId: '', message: '' });
-    const [ job, setJob ] = useState({ connecting: false, connected: false, started: false, paused: false, percentage: null });
+    const [ job, setJob ] = useState({ connecting: false, connected: false, started: true, paused: false, percentage: null });
     const [ progress, setProgress ] = useState({ uploading: false, converting: false, progress: 0 })
     const [ setupModal, setSetupModal ] = useState(false);
     const [ ws, setWs ] = useState(null);
     const [colors, setColors] = useState([
-        { color: '#ff0000', name: 'Red', zValue: -9, command: "G6.1" },
-        { color: '#ffa500', name: 'Orange', zValue: -9.8, command: "G6.6" },
-        { color: '#000000', name: 'Black', zValue: -32.5, command: "G6.7" },
-        { color: '#227fe3', name: 'Blue', zValue: -9.8, command: "G6.5" },
-        { color: '#ffff00', name: 'Yellow', zValue: -9.5, command: "G6.3" },
-        { color: '#008000', name: 'Green', zValue: -9.9, command: "G6.4" },
-        { color: '#ffc0cb', name: 'Pink', zValue: -9.5, command: "G6.2" },
-        { color: '#a52a2a', name: 'Brown', zValue: -9.5, command: "G6.8" },
+        { 
+            color: '#ff0000', 
+            name: 'Red', 
+            zValue: -9, 
+            penPick: [ 'G0 Y50', 'G0 X799.9','G0 Z-26.1', 'G0 Y0.6', 'G0 Z-16', 'G0 Y50' ],
+            penDrop: [ 'G0 X799.9Z-16', 'G0 Y50', 'G0 Y0.6', 'G0 Z-26.1', 'G0 Y50' ]
+        },
+        { 
+            color: '#ffa500', 
+            name: 'Orange', 
+            zValue: -9.8, 
+            penPick: [ 'G0 Y50', 'G0 X799.9','G0 Z-26.1', 'G0 Y0.6', 'G0 Z-16', 'G0 Y50' ],
+            penDrop: [ 'G0 X799.9Z-16', 'G0 Y50', 'G0 Y0.6', 'G0 Z-26.1', 'G0 Y50' ]
+        },
+        { 
+            color: '#000000', 
+            name: 'Black', 
+            zValue: -32.5, 
+            penPick: [ 'G0 Y50', 'G0 X799.3', 'G0 Z-26.1', 'G0 Y0.6', 'G0 Z-16', 'G0 Y50' ],
+            penDrop: [ 'G0 X799.3Z-16', 'G0 Y50', 'G0 Y0.6', 'G0 Z-26.1', 'G0 Y50' ]
+        },
+        { 
+            color: '#227fe3', 
+            name: 'Blue', 
+            zValue: -9.8, 
+            penPick: [ 'G0 Y50', 'G0 X799.9', 'G0 Z-26.1', 'G0 Y0.6', 'G0 Z-16', 'G0 Y50' ],
+            penDrop: [ 'G0 X799.9Z-16', 'G0 Y50', 'G0 Y0.6', 'G0 Z-26.1', 'G0 Y50' ] 
+        },
+        { 
+            color: '#ffff00', 
+            name: 'Yellow', 
+            zValue: -9.5, 
+            penPick: [ 'G0 Y50', 'G0 X799.9','G0 Z-26.1', 'G0 Y0.6', 'G0 Z-16', 'G0 Y50' ],
+            penDrop: [ 'G0 X799.9Z-16', 'G0 Y50', 'G0 Y0.6', 'G0 Z-26.1', 'G0 Y50' ]
+        },
+        { 
+            color: '#008000', 
+            name: 'Green', 
+            zValue: -9.9, 
+            penPick: [ 'G0 Y50', 'G0 X799.9','G0 Z-26.1', 'G0 Y0.6', 'G0 Z-16', 'G0 Y50' ],
+            penDrop: [ 'G0 X799.9Z-16', 'G0 Y50', 'G0 Y0.6', 'G0 Z-26.1', 'G0 Y50' ]
+        },
+        { 
+            color: '#ffc0cb', 
+            name: 'Pink', 
+            zValue: -9.5, 
+            penPick: [ 'G0 Y50', 'G0 X799.9','G0 Z-26.1', 'G0 Y0.6', 'G0 Z-16', 'G0 Y50' ],
+            penDrop: [ 'G0 X799.9Z-16', 'G0 Y50', 'G0 Y0.6', 'G0 Z-26.1', 'G0 Y50' ]
+        },
+        { 
+            color: '#a52a2a', 
+            name: 'Brown', 
+            zValue: -9.5, 
+            penPick: [ 'G0 Y50', 'G0 X799.9','G0 Z-26.1', 'G0 Y0.6', 'G0 Z-16', 'G0 Y50' ],
+            penDrop: [ 'G0 X799.9Z-16', 'G0 Y50', 'G0 Y0.6', 'G0 Z-26.1', 'G0 Y50' ]
+        },
     ]);
     const [ config, setConfig ] = useState({
         // url: window.location.hostname,
-        url: 'plotter.local',
+        url: 'fluidnc.local',
         feedRate: 4000,
         jogSpeed: 12000,
-        zOffset: 10,
+        zOffset: 5,
         open: false
     });
 
