@@ -65,7 +65,7 @@ export function useCom() {
 export const CommunicationProvider = ({ children }) => {
     const { canvas } = useCanvas()
     const [ response, setResponse ] = useState({ pageId: '', message: '' });
-    const [ job, setJob ] = useState({ connecting: false, connected: false, started: true, paused: false, percentage: null });
+    const [ job, setJob ] = useState({ connecting: false, connected: false, started: false, paused: false, percentage: null });
     const [ progress, setProgress ] = useState({ uploading: false, converting: false, progress: 0 })
     const [ setupModal, setSetupModal ] = useState(false);
     const [ ws, setWs ] = useState(null);
@@ -73,63 +73,63 @@ export const CommunicationProvider = ({ children }) => {
         { 
             color: '#ffff00', 
             name: 'Yellow', 
-            zValue: -33.2, 
-            penPick: [ 'G0 Y50', 'G0 X799.9','G0 Z-26.3', 'G0 Y1.2', 'G0 Z-16', 'G0 Y50' ],
+            zValue: -33.3, 
+            penPick: [ 'G0 Y50', 'G0 X799.9','G0 Z-26.3', 'G0 Y1.2', 'G0 Z-16', 'G0 Y50', 'G0 X420' ],
             penDrop: [ 'G0 X799.9Z-16', 'G0 Y50', 'G0 Y1.2', 'G0 Z-26.3', 'G0 Y50' ]
         },
         { 
             color: '#008000', 
             name: 'Green', 
-            zValue: -33.2, 
-            penPick: [ 'G0 Y50', 'G0 X763.3','G0 Z-26.3', 'G0 Y1.2', 'G0 Z-16', 'G0 Y50' ],
-            penDrop: [ 'G0 X763.3Z-16', 'G0 Y50', 'G0 Y1.2', 'G0 Z-26.3', 'G0 Y50' ]
+            zValue: -33.3, 
+            penPick: [ 'G0 Y50', 'G0 X763.3','G0 Z-26.3', 'G0 Y1.2', 'G0 Z-16', 'G0 Y50', 'G0 X420' ],
+            penDrop: [ 'G0 Y50', 'G0 X763.3Z-16', 'G0 Y1.2', 'G0 Z-26.3', 'G0 Y50' ]
         },
         { 
             color: '#5e5e5e', 
             name: 'Gray', 
-            zValue: -33.2, 
-            penPick: [ 'G0 Y50', 'G0 X724.8','G0 Z-26.3', 'G0 Y1.2', 'G0 Z-16', 'G0 Y50' ],
-            penDrop: [ 'G0 X724.8Z-16', 'G0 Y50', 'G0 Y1.2', 'G0 Z-26.3', 'G0 Y50' ]
+            zValue: -33.3, 
+            penPick: [ 'G0 Y50', 'G0 X724.8','G0 Z-26.3', 'G0 Y1.2', 'G0 Z-16', 'G0 Y50', 'G0 X420' ],
+            penDrop: [ 'G0 Y50', 'G0 X724.8Z-16', 'G0 Y1.2', 'G0 Z-26.3', 'G0 Y50' ]
         },
         { 
             color: '#227fe3', 
             name: 'Blue', 
-            zValue: -33.2, 
-            penPick: [ 'G0 Y50', 'G0 X687.3', 'G0 Z-26.3', 'G0 Y1.2', 'G0 Z-16', 'G0 Y50' ],
-            penDrop: [ 'G0 X687.3Z-16', 'G0 Y50', 'G0 Y1.2', 'G0 Z-26.3', 'G0 Y50' ] 
+            zValue: -33.3, 
+            penPick: [ 'G0 Y50', 'G0 X687.3', 'G0 Z-26.3', 'G0 Y1.2', 'G0 Z-16', 'G0 Y50', 'G0 X420' ],
+            penDrop: [ 'G0 Y50', 'G0 X687.3Z-16', 'G0 Y1.2', 'G0 Z-26.3', 'G0 Y50' ] 
         },
         { 
             color: '#a020f0', 
             name: 'Purple', 
-            zValue: -33.2, 
-            penPick: [ 'G0 Y50', 'G0 X650.9', 'G0 Z-26.3', 'G0 Y2.6', 'G0 Z-16', 'G0 Y50' ],
-            penDrop: [ 'G0 X650.9Z-16', 'G0 Y50', 'G0 Y2.6', 'G0 Z-26.3', 'G0 Y50' ]
+            zValue: -33.3, 
+            penPick: [ 'G0 Y50', 'G0 X650.9', 'G0 Z-26.3', 'G0 Y2.6', 'G0 Z-16', 'G0 Y50', 'G0 X420' ],
+            penDrop: [ 'G0 Y50', 'G0 X650.9Z-16', 'G0 Y2.6', 'G0 Z-26.3', 'G0 Y50' ]
         },
         { 
             color: '#ffc0cb', 
             name: 'Pink', 
-            zValue: -33.2, 
-            penPick: [ 'G0 Y50', 'G0 X799.9','G0 Z-26.3', 'G0 Y2.6', 'G0 Z-16', 'G0 Y50' ],
-            penDrop: [ 'G0 X799.9Z-16', 'G0 Y50', 'G0 Y2.6', 'G0 Z-26.3', 'G0 Y50' ]
+            zValue: -33.3, 
+            penPick: [ 'G0 Y50', 'G0 X799.9','G0 Z-26.3', 'G0 Y2.6', 'G0 Z-16', 'G0 Y50', 'G0 X420' ],
+            penDrop: [ 'G0 Y50', 'G0 X799.9Z-16', 'G0 Y2.6', 'G0 Z-26.3', 'G0 Y50' ]
         },
         { 
             color: '#ffa500', 
             name: 'Orange', 
-            zValue: -33.2, 
-            penPick: [ 'G0 Y50', 'G0 X799.9','G0 Z-26.3', 'G0 Y2.6', 'G0 Z-16', 'G0 Y50' ],
-            penDrop: [ 'G0 X799.9Z-16', 'G0 Y50', 'G0 Y2.6', 'G0 Z-26.3', 'G0 Y50' ]
+            zValue: -33.3, 
+            penPick: [ 'G0 Y50', 'G0 X799.9','G0 Z-26.3', 'G0 Y2.6', 'G0 Z-16', 'G0 Y50', 'G0 X420' ],
+            penDrop: [ 'G0 Y50', 'G0 X799.9Z-16', 'G0 Y2.6', 'G0 Z-26.3', 'G0 Y50' ]
         },
         { 
             color: '#ff0000', 
             name: 'Red', 
-            zValue: -33.2, 
-            penPick: [ 'G0 Y50', 'G0 X799.9','G0 Z-26.3', 'G0 Y2.6', 'G0 Z-16', 'G0 Y50' ],
-            penDrop: [ 'G0 X799.9Z-16', 'G0 Y50', 'G0 Y2.6', 'G0 Z-26.3', 'G0 Y50' ]
+            zValue: -33.3, 
+            penPick: [ 'G0 Y50', 'G0 X799.9','G0 Z-26.3', 'G0 Y2.6', 'G0 Z-16', 'G0 Y50', 'G0 X420' ],
+            penDrop: [ 'G0 Y50', 'G0 X799.9Z-16', 'G0 Y2.6', 'G0 Z-26.3', 'G0 Y50' ]
         },
     ]);
     const [ config, setConfig ] = useState({
         // url: window.location.hostname,
-        // url: 'plotter.local',
+        url: 'plotter.local',
         feedRate: 4000,
         jogSpeed: 12000,
         zOffset: 5,

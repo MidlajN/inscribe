@@ -102,7 +102,7 @@ export const convertToGcode = async (svgElements, colors, config) => {
     }));
 
     return [
-        '$H', 
+        // '$H', 
         'G0 X0Y0',
         'G10 L20 P0 X0 Y0 Z0', 
         `G1 F${config.feedRate} `, 

@@ -1,5 +1,5 @@
 import './App.css'
-import { Logo, Pen, Eraser, ArrowLeft, Pan, ArrowUp, Home, Cross, Report } from './icons'
+import { Logo, Pen, Eraser, ArrowLeft, Pan, ArrowUp, Home, Cross, Report, Pause, Stop, Resume } from './icons'
 import useCanvas, { useCom } from './context'
 import { useEffect, useState , useRef } from 'react';
 import { PencilBrush,  } from 'fabric';
@@ -16,9 +16,14 @@ function App() {
       <div className='flex flex-col h-screen overflow-hidden'>
       
         {/* ---------- Navbar ---------- */}
-        <div className='bg-white px-4 py-[0.65rem] rounded-xl flex items-end absolute left-4 top-5 z-10'>
+        <div className='bg-white px-4 py-[0.65rem] rounded-xl flex gap-1 items-end absolute left-4 top-5 z-10'>
           <Logo width={138} height={35}/>
-          <p>{}</p>
+          <p 
+            className='text-[12px] font-medium tracking-wide'
+            style={{ color: job.connected ? '#009a1b' : job.connecting ? '#006dcb' : '#f10000'}}
+          >
+            { job.connected ? 'Connected' : job.connecting ? 'Connecting' : 'Failed' }
+          </p>
         </div>
         <SetUp pan={pan} setPan={setPan} />
 
@@ -30,8 +35,10 @@ function App() {
             initialScale={0.75} 
             maxScale={1}
             minScale={.3} 
-            panning={{ excluded: ['fabricCanvas'] }}
+            panning={ !pan ? { excluded: ['fabricCanvas'] } : null }
             centerOnInit 
+            limitToBounds={ !pan }
+            velocityAnimation={false}
             disabled={ !pan }
           >
             <TransformComponent
@@ -51,10 +58,7 @@ function App() {
     </>
   )
 }
-
 export default App
-
-
 
 // eslint-disable-next-line react/prop-types
 function SetUp({ pan, setPan }) {
@@ -74,10 +78,9 @@ function SetUp({ pan, setPan }) {
     if (ws) return;
     if (!job.connected) {
       console.log('Not Connected :: connecting....', job)
-      openSocket()
+      // openSocket()
     }
   }, [ws, job, openSocket])
-
 
   return (
     <>
@@ -125,16 +128,6 @@ function SetUp({ pan, setPan }) {
           </div>
         ))}
       </div>
-
-      {/* <div 
-        className='group bg-[#0E505C] w-fit flex items-center justify-between gap-4 rounded-full absolute right-8 top-9 z-10 cursor-pointer ' 
-        onClick={() => { if (ws) plot() }}
-      >
-        <p className='text-white text-sm font-bold indent-5 tracking-wide'>Print Now</p>
-        <div className='bg-[#095D6C] p-3 rounded-r-full group-hover:rounded-full transition-all duration-500'>
-          <ArrowLeft width={8} height={8} />
-        </div>
-      </div> */}
       <Configs /> 
     </>
   )
@@ -189,18 +182,45 @@ const Configs = () => {
   return (
     <>
       <div className='absolute right-8 top-7 z-10 overflow-hidden'>
-        <div className='flex justify-between items-center min-w-[15rem] bg-[#095D6C] rounded-md'>
+        <div 
+          className='flex justify-between items-center min-w-[15rem] rounded-md'
+          style={{ backgroundColor: job.started ? '#0f4c7d' : '#095D6C'}}
+        >
           <div className='px-4 border-r border-[#ffffff3d] hover:border-[#6c36093d] cursor-pointer' onClick={() => { setOpen(!open) }}>
             <ArrowUp width={20} height={20} style={{ rotate: open ? '' : '180deg'}} className={'transition-all duration-500'} />
           </div>
           <div 
-            className='group p-1 flex items-center justify-between gap-4 cursor-pointer bg-[#095D6C] rounded-md' 
-            onClick={() => { if (ws) plot(); }}
+            className='group p-1 flex items-center gap-1 cursor-pointer rounded-md' 
+            onClick={() => { if (ws && !job.started) plot(); }}
           >
-            <p className='text-[#fff] text-sm px-4 font-bold indent-5 tracking-wide'>Print Now</p>
-            <div className='border bg-[#116d7e] p-3 rounded-md border-[#1a6a79] transition-all duration-500'>
-              <ArrowLeft width={8} height={8} color={'#fff'} />
-            </div>
+            { !job.started ? (
+              <>
+                <p className='text-[#fff] text-sm px-9 font-bold tracking-wide'>Print Now</p>
+                <div className='border bg-[#116d7e] group-hover:bg-[#116d7e] group-active:bg-[#1e5863] p-3 rounded-md border-[#1a6a79] transition-all duration-500'>
+                  <ArrowLeft width={8} height={8} color={'#fff'} />
+                </div>
+              </>
+            ):(
+              <>
+                <p className='text-[#fff] text-sm px-4 font-bold tracking-wide'>Drawing..</p>
+                <div 
+                  className='p-3 bg-[#085da2] rounded-md transition-all duration-500 hover:bg-[#085da2] active:bg-[#1a4e79] focus:outline-none focus:ring focus:ring-[#0f4c7d] '
+                  onClick={() => { 
+                    sendToMachine(job.paused ? '~' : '!');
+                    setJob({ ...job, paused: !job.paused });
+                  }} 
+                >
+                  { job.paused ? (
+                    <Resume width={8} height={8} />
+                  ):(
+                    <Pause width={8} height={8} />
+                  )}
+                </div>
+                <div className='p-3 bg-[#085da2] rounded-md transition-all duration-500 hover:bg-[#085da2] active:bg-[#1a4e79] focus:outline-none focus:ring focus:ring-[#0f4c7d]'>
+                  <Stop width={8} height={8} />
+                </div>
+              </>
+            )}
           </div>
         </div>
         
@@ -245,7 +265,7 @@ const useEditorSetup= ({stroke, tool, pan, setPan}) => {
 
     canvas.getObjects().forEach(obj => {
       obj.set({
-        selectable: pan
+        selectable: false
       })
     });
     
@@ -288,7 +308,7 @@ const useEditorSetup= ({stroke, tool, pan, setPan}) => {
       };
 
     } else {
-      canvas.selection = true;
+      // canvas.selection = true;
       setPan(true);
     }
 
