@@ -71,65 +71,65 @@ export const CommunicationProvider = ({ children }) => {
     const [ ws, setWs ] = useState(null);
     const [colors, setColors] = useState([
         { 
-            color: '#ff0000', 
-            name: 'Red', 
-            zValue: -9, 
-            penPick: [ 'G0 Y50', 'G0 X799.9','G0 Z-26.1', 'G0 Y0.6', 'G0 Z-16', 'G0 Y50' ],
-            penDrop: [ 'G0 X799.9Z-16', 'G0 Y50', 'G0 Y0.6', 'G0 Z-26.1', 'G0 Y50' ]
-        },
-        { 
-            color: '#ffa500', 
-            name: 'Orange', 
-            zValue: -9.8, 
-            penPick: [ 'G0 Y50', 'G0 X799.9','G0 Z-26.1', 'G0 Y0.6', 'G0 Z-16', 'G0 Y50' ],
-            penDrop: [ 'G0 X799.9Z-16', 'G0 Y50', 'G0 Y0.6', 'G0 Z-26.1', 'G0 Y50' ]
-        },
-        { 
-            color: '#000000', 
-            name: 'Black', 
-            zValue: -32.5, 
-            penPick: [ 'G0 Y50', 'G0 X799.3', 'G0 Z-26.1', 'G0 Y0.6', 'G0 Z-16', 'G0 Y50' ],
-            penDrop: [ 'G0 X799.3Z-16', 'G0 Y50', 'G0 Y0.6', 'G0 Z-26.1', 'G0 Y50' ]
-        },
-        { 
-            color: '#227fe3', 
-            name: 'Blue', 
-            zValue: -9.8, 
-            penPick: [ 'G0 Y50', 'G0 X799.9', 'G0 Z-26.1', 'G0 Y0.6', 'G0 Z-16', 'G0 Y50' ],
-            penDrop: [ 'G0 X799.9Z-16', 'G0 Y50', 'G0 Y0.6', 'G0 Z-26.1', 'G0 Y50' ] 
-        },
-        { 
             color: '#ffff00', 
             name: 'Yellow', 
-            zValue: -9.5, 
-            penPick: [ 'G0 Y50', 'G0 X799.9','G0 Z-26.1', 'G0 Y0.6', 'G0 Z-16', 'G0 Y50' ],
-            penDrop: [ 'G0 X799.9Z-16', 'G0 Y50', 'G0 Y0.6', 'G0 Z-26.1', 'G0 Y50' ]
+            zValue: -33.2, 
+            penPick: [ 'G0 Y50', 'G0 X799.9','G0 Z-26.3', 'G0 Y1.2', 'G0 Z-16', 'G0 Y50' ],
+            penDrop: [ 'G0 X799.9Z-16', 'G0 Y50', 'G0 Y1.2', 'G0 Z-26.3', 'G0 Y50' ]
         },
         { 
             color: '#008000', 
             name: 'Green', 
-            zValue: -9.9, 
-            penPick: [ 'G0 Y50', 'G0 X799.9','G0 Z-26.1', 'G0 Y0.6', 'G0 Z-16', 'G0 Y50' ],
-            penDrop: [ 'G0 X799.9Z-16', 'G0 Y50', 'G0 Y0.6', 'G0 Z-26.1', 'G0 Y50' ]
+            zValue: -33.2, 
+            penPick: [ 'G0 Y50', 'G0 X763.3','G0 Z-26.3', 'G0 Y1.2', 'G0 Z-16', 'G0 Y50' ],
+            penDrop: [ 'G0 X763.3Z-16', 'G0 Y50', 'G0 Y1.2', 'G0 Z-26.3', 'G0 Y50' ]
+        },
+        { 
+            color: '#5e5e5e', 
+            name: 'Gray', 
+            zValue: -33.2, 
+            penPick: [ 'G0 Y50', 'G0 X724.8','G0 Z-26.3', 'G0 Y1.2', 'G0 Z-16', 'G0 Y50' ],
+            penDrop: [ 'G0 X724.8Z-16', 'G0 Y50', 'G0 Y1.2', 'G0 Z-26.3', 'G0 Y50' ]
+        },
+        { 
+            color: '#227fe3', 
+            name: 'Blue', 
+            zValue: -33.2, 
+            penPick: [ 'G0 Y50', 'G0 X687.3', 'G0 Z-26.3', 'G0 Y1.2', 'G0 Z-16', 'G0 Y50' ],
+            penDrop: [ 'G0 X687.3Z-16', 'G0 Y50', 'G0 Y1.2', 'G0 Z-26.3', 'G0 Y50' ] 
+        },
+        { 
+            color: '#a020f0', 
+            name: 'Purple', 
+            zValue: -33.2, 
+            penPick: [ 'G0 Y50', 'G0 X650.9', 'G0 Z-26.3', 'G0 Y2.6', 'G0 Z-16', 'G0 Y50' ],
+            penDrop: [ 'G0 X650.9Z-16', 'G0 Y50', 'G0 Y2.6', 'G0 Z-26.3', 'G0 Y50' ]
         },
         { 
             color: '#ffc0cb', 
             name: 'Pink', 
-            zValue: -9.5, 
-            penPick: [ 'G0 Y50', 'G0 X799.9','G0 Z-26.1', 'G0 Y0.6', 'G0 Z-16', 'G0 Y50' ],
-            penDrop: [ 'G0 X799.9Z-16', 'G0 Y50', 'G0 Y0.6', 'G0 Z-26.1', 'G0 Y50' ]
+            zValue: -33.2, 
+            penPick: [ 'G0 Y50', 'G0 X799.9','G0 Z-26.3', 'G0 Y2.6', 'G0 Z-16', 'G0 Y50' ],
+            penDrop: [ 'G0 X799.9Z-16', 'G0 Y50', 'G0 Y2.6', 'G0 Z-26.3', 'G0 Y50' ]
         },
         { 
-            color: '#a52a2a', 
-            name: 'Brown', 
-            zValue: -9.5, 
-            penPick: [ 'G0 Y50', 'G0 X799.9','G0 Z-26.1', 'G0 Y0.6', 'G0 Z-16', 'G0 Y50' ],
-            penDrop: [ 'G0 X799.9Z-16', 'G0 Y50', 'G0 Y0.6', 'G0 Z-26.1', 'G0 Y50' ]
+            color: '#ffa500', 
+            name: 'Orange', 
+            zValue: -33.2, 
+            penPick: [ 'G0 Y50', 'G0 X799.9','G0 Z-26.3', 'G0 Y2.6', 'G0 Z-16', 'G0 Y50' ],
+            penDrop: [ 'G0 X799.9Z-16', 'G0 Y50', 'G0 Y2.6', 'G0 Z-26.3', 'G0 Y50' ]
+        },
+        { 
+            color: '#ff0000', 
+            name: 'Red', 
+            zValue: -33.2, 
+            penPick: [ 'G0 Y50', 'G0 X799.9','G0 Z-26.3', 'G0 Y2.6', 'G0 Z-16', 'G0 Y50' ],
+            penDrop: [ 'G0 X799.9Z-16', 'G0 Y50', 'G0 Y2.6', 'G0 Z-26.3', 'G0 Y50' ]
         },
     ]);
     const [ config, setConfig ] = useState({
         // url: window.location.hostname,
-        url: 'fluidnc.local',
+        // url: 'plotter.local',
         feedRate: 4000,
         jogSpeed: 12000,
         zOffset: 5,
@@ -148,7 +148,8 @@ export const CommunicationProvider = ({ children }) => {
 
     const openSocket = useCallback(() => {
         setSetupModal(true);
-        if (ws !== null) return;
+        if (ws && ws.readyState === WebSocket.OPEN) return;
+
         try {
             setJob({ ...job, connecting: true, connected: false, started: false })
                 

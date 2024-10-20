@@ -8,6 +8,7 @@ import { convertToGcode, returnGroupedObjects, returnSvgElements, sortSvgElement
 
 function App() { 
   const { canvasRef } = useCanvas();
+  const { job } = useCom();
   const [ pan, setPan ] = useState(false);
 
   return (
@@ -17,6 +18,7 @@ function App() {
         {/* ---------- Navbar ---------- */}
         <div className='bg-white px-4 py-[0.65rem] rounded-xl flex items-end absolute left-4 top-5 z-10'>
           <Logo width={138} height={35}/>
+          <p>{}</p>
         </div>
         <SetUp pan={pan} setPan={setPan} />
 
@@ -46,8 +48,6 @@ function App() {
           </TransformWrapper>
         </section>
       </div>
-
-      <Configs /> 
     </>
   )
 }
@@ -58,10 +58,9 @@ export default App
 
 // eslint-disable-next-line react/prop-types
 function SetUp({ pan, setPan }) {
-  const { colors, config, openSocket, job, setJob, sendToMachine, ws } = useCom();
-  const { canvas } = useCanvas();
+  const { colors, openSocket, job, ws } = useCom();
 
-  const [ stroke, setStroke ] = useState('#000000');
+  const [ stroke, setStroke ] = useState('#5e5e5e');
   const [ tool, setTool ] = useState('Pen');
 
   useEditorSetup({ 
@@ -79,38 +78,6 @@ function SetUp({ pan, setPan }) {
     }
   }, [ws, job, openSocket])
 
-  const uploadToMachine = async (gcode) => {
-    const blob = new Blob([gcode.join('\n')], { type: 'text/plain '});
-    const file = new File([blob], 'job.gcode', { type: 'text/plain' });
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-      const response =  await fetch(`http://${ config.url }/upload`, {
-        method: 'POST',
-        body: formData
-      });
-      const data = await response.json();
-      console.log('Request Send Successfully :', data);
-
-      sendToMachine(`[ESP220]/${file.name}`);
-      setJob({ ...job, started:  true});
-    } catch  (err) {
-      console.log('Error While Uploading : ', err);
-    }
-  }
-
-  const plot = async () => {
-    const groupedObjects = returnGroupedObjects(canvas);
-    const svgElements = returnSvgElements(groupedObjects, canvas.getWidth(), canvas.getHeight());
-    sortSvgElements(svgElements, colors);
-    console.log(svgElements);
-
-    const gcodes = await convertToGcode(svgElements, colors, config);
-    console.log('Generated G-Code : ', gcodes.join('\n'));
-
-    uploadToMachine(gcodes);
-  }
 
   return (
     <>
@@ -159,7 +126,7 @@ function SetUp({ pan, setPan }) {
         ))}
       </div>
 
-      <div 
+      {/* <div 
         className='group bg-[#0E505C] w-fit flex items-center justify-between gap-4 rounded-full absolute right-8 top-9 z-10 cursor-pointer ' 
         onClick={() => { if (ws) plot() }}
       >
@@ -167,14 +134,49 @@ function SetUp({ pan, setPan }) {
         <div className='bg-[#095D6C] p-3 rounded-r-full group-hover:rounded-full transition-all duration-500'>
           <ArrowLeft width={8} height={8} />
         </div>
-      </div>
+      </div> */}
+      <Configs /> 
     </>
   )
 }
 
 const Configs = () => {
   const [ open, setOpen ] = useState(true);
-  const { job, response, sendToMachine } = useCom()
+  const { colors, config, job, setJob, ws, response, sendToMachine } = useCom();
+  const { canvas } = useCanvas();
+
+  const uploadToMachine = async (gcode) => {
+    const blob = new Blob([gcode.join('\n')], { type: 'text/plain '});
+    const file = new File([blob], 'job.gcode', { type: 'text/plain' });
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response =  await fetch(`http://${ config.url }/upload`, {
+        method: 'POST',
+        body: formData
+      });
+      const data = await response.json();
+      console.log('Request Send Successfully :', data);
+
+      sendToMachine(`[ESP220]/${file.name}`);
+      setJob({ ...job, started:  true});
+    } catch  (err) {
+      console.log('Error While Uploading : ', err);
+    }
+  }
+
+  const plot = async () => {
+    const groupedObjects = returnGroupedObjects(canvas);
+    const svgElements = returnSvgElements(groupedObjects, canvas.getWidth(), canvas.getHeight());
+    sortSvgElements(svgElements, colors);
+    console.log(svgElements);
+
+    const gcodes = await convertToGcode(svgElements, colors, config);
+    console.log('Generated G-Code : ', gcodes.join('\n'));
+
+    uploadToMachine(gcodes);
+  }
 
   const textareaRef = useRef(null)
 
@@ -186,17 +188,31 @@ const Configs = () => {
 
   return (
     <>
-      <div className='absolute z-20 bottom-6 right-8 border-[#095d6c3d] bg-white border rounded-xl overflow-hidden'>
+      <div className='absolute right-8 top-7 z-10 overflow-hidden'>
+        <div className='flex justify-between items-center min-w-[15rem] bg-[#095D6C] rounded-md'>
+          <div className='px-4 border-r border-[#ffffff3d] hover:border-[#6c36093d] cursor-pointer' onClick={() => { setOpen(!open) }}>
+            <ArrowUp width={20} height={20} style={{ rotate: open ? '' : '180deg'}} className={'transition-all duration-500'} />
+          </div>
+          <div 
+            className='group p-1 flex items-center justify-between gap-4 cursor-pointer bg-[#095D6C] rounded-md' 
+            onClick={() => { if (ws) plot(); }}
+          >
+            <p className='text-[#fff] text-sm px-4 font-bold indent-5 tracking-wide'>Print Now</p>
+            <div className='border bg-[#116d7e] p-3 rounded-md border-[#1a6a79] transition-all duration-500'>
+              <ArrowLeft width={8} height={8} color={'#fff'} />
+            </div>
+          </div>
+        </div>
+        
+
         <div 
-          className='machineMsg overflow-hidden transition-all duration-500'
-          style={{ height: open ? '13rem' : '0rem',}}
+          className='machineMsg overflow-hidden transition-all rounded-md duration-500 border-[#095d6c3d] bg-white'
+          style={{ 
+            borderWidth: open ? '1px' : '',
+            height: open ? '13rem' : '0rem',
+            marginTop: open ? '0.75rem' : '0rem'
+          }}
         >
-          <textarea 
-            ref={textareaRef} 
-            value={ response.message } 
-            className="cursor-default lg:pb-8" 
-            readOnly
-          ></textarea> 
           <div className='buttons'>
             <div className='p-3' onClick={() => { sendToMachine('$H') }}>
               <Home width={18} height={18} />
@@ -208,33 +224,12 @@ const Configs = () => {
               <Report width={18} height={18} />
             </div>
           </div>
-        </div>
-        <div className=' flex justify-around items-center py-2'>
-          <div className='pr-4 pl-5 border-r border-[#095d6c3d] hover:border-[#6c36093d] cursor-pointer' onClick={() => { setOpen(!open) }}>
-              <ArrowUp width={20} height={20} style={{ rotate: open ? '180deg' : ''}} className={'transition-all duration-500'} />
-          </div>
-          <div className='min-w-52 flex justify-center items-center gap-3 px-3'>
-              { job.started ? (
-                <>
-                  <div className="w-[80%] bg-gray-200 rounded-full h-1 overflow-hidden">
-                    <div 
-                        className="h-full transition-all duration-500" 
-                        style={{ width: `${job.percentage}%`, background: '#095D6C' }}
-                    />
-                  </div>
-                  <p className='text-xs font-medium text-[#062f36]'>{job.percentage}%</p>
-                </>
-              ): (
-                <>
-                  <p 
-                    className='text-sm font-medium cursor-defaul'
-                    style={{ color: job.connected ? '#062f36' : job.connecting ? '#0368db' : '#6c0909' }}
-                  >
-                    { job.connected ? 'Connected' : job.connecting ? 'Connecting...' : 'Connection Failed'}
-                  </p>
-                </>
-              )}
-          </div>
+          <textarea 
+            ref={textareaRef} 
+            value={ response.message } 
+            className="cursor-default lg:pb-8" 
+            readOnly
+          ></textarea> 
         </div>
       </div>
     </>
