@@ -68,70 +68,71 @@ export const CommunicationProvider = ({ children }) => {
     const [ job, setJob ] = useState({ connecting: false, connected: false, started: false, paused: false, percentage: null });
     const [ progress, setProgress ] = useState({ uploading: false, converting: false, progress: 0 })
     const [ setupModal, setSetupModal ] = useState(false);
+    // const [ restarting , setRestarting ] = useState(false);
     const [ ws, setWs ] = useState(null);
     const [colors, setColors] = useState([
         { 
             color: '#ffff00', 
             name: 'Yellow', 
-            zValue: -33.3, 
-            penPick: [ 'G0 Y50', 'G0 X799.9','G0 Z-26.3', 'G0 Y1.2', 'G0 Z-16', 'G0 Y50', 'G0 X420' ],
-            penDrop: [ 'G0 X799.9Z-16', 'G0 Y50', 'G0 Y1.2', 'G0 Z-26.3', 'G0 Y50' ]
+            zValue: -33.4, 
+            penPick: [ 'G0 Y50', 'G0 X799.9Z-26.3', 'G0 Y1.2', 'G0 Z-16', 'G0 Y60', 'G0 X420' ],
+            penDrop: [ 'G0 Y50', 'G0 X799.9Z-16', 'G0 Y1.2', 'G0 Z-26.3', 'G0 Y50' ]
         },
         { 
             color: '#008000', 
             name: 'Green', 
-            zValue: -33.3, 
-            penPick: [ 'G0 Y50', 'G0 X763.3','G0 Z-26.3', 'G0 Y1.2', 'G0 Z-16', 'G0 Y50', 'G0 X420' ],
-            penDrop: [ 'G0 Y50', 'G0 X763.3Z-16', 'G0 Y1.2', 'G0 Z-26.3', 'G0 Y50' ]
+            zValue: -33.4, 
+            penPick: [ 'G0 Y60', 'G0 X763.3Z-26.3', 'G0 Y1.2', 'G0 Z-16', 'G0 Y60', 'G0 X420' ],
+            penDrop: [ 'G0 Y60', 'G0 X763.3Z-16', 'G0 Y1.2', 'G0 Z-26.3', 'G0 Y60' ]
         },
         { 
             color: '#5e5e5e', 
             name: 'Gray', 
-            zValue: -33.3, 
-            penPick: [ 'G0 Y50', 'G0 X724.8','G0 Z-26.3', 'G0 Y1.2', 'G0 Z-16', 'G0 Y50', 'G0 X420' ],
-            penDrop: [ 'G0 Y50', 'G0 X724.8Z-16', 'G0 Y1.2', 'G0 Z-26.3', 'G0 Y50' ]
+            zValue: -33.4, 
+            penPick: [ 'G0 Y60', 'G0 X724.8Z-26.3', 'G0 Y1.2', 'G0 Z-16', 'G0 Y60', 'G0 X420' ],
+            penDrop: [ 'G0 Y60', 'G0 X724.8Z-16', 'G0 Y1.2', 'G0 Z-26.3', 'G0 Y60' ]
         },
         { 
             color: '#227fe3', 
             name: 'Blue', 
-            zValue: -33.3, 
-            penPick: [ 'G0 Y50', 'G0 X687.3', 'G0 Z-26.3', 'G0 Y1.2', 'G0 Z-16', 'G0 Y50', 'G0 X420' ],
-            penDrop: [ 'G0 Y50', 'G0 X687.3Z-16', 'G0 Y1.2', 'G0 Z-26.3', 'G0 Y50' ] 
+            zValue: -33.4, 
+            penPick: [ 'G0 Y60', 'G0 X687.3Z-26.3', 'G0 Y1.2', 'G0 Z-16', 'G0 Y60', 'G0 X420' ],
+            penDrop: [ 'G0 Y60', 'G0 X687.3Z-16', 'G0 Y1.2', 'G0 Z-26.3', 'G0 Y60' ] 
         },
         { 
             color: '#a020f0', 
             name: 'Purple', 
-            zValue: -33.3, 
-            penPick: [ 'G0 Y50', 'G0 X650.9', 'G0 Z-26.3', 'G0 Y2.6', 'G0 Z-16', 'G0 Y50', 'G0 X420' ],
-            penDrop: [ 'G0 Y50', 'G0 X650.9Z-16', 'G0 Y2.6', 'G0 Z-26.3', 'G0 Y50' ]
+            zValue: -33.4, 
+            penPick: [ 'G0 Y60', 'G0 X650.9Z-26.3', 'G0 Y2.6', 'G0 Z-16', 'G0 Y60', 'G0 X420' ],
+            penDrop: [ 'G0 Y60', 'G0 X650.9Z-16', 'G0 Y2.6', 'G0 Z-26.3', 'G0 Y60' ]
         },
         { 
             color: '#ffc0cb', 
             name: 'Pink', 
-            zValue: -33.3, 
-            penPick: [ 'G0 Y50', 'G0 X799.9','G0 Z-26.3', 'G0 Y2.6', 'G0 Z-16', 'G0 Y50', 'G0 X420' ],
-            penDrop: [ 'G0 Y50', 'G0 X799.9Z-16', 'G0 Y2.6', 'G0 Z-26.3', 'G0 Y50' ]
+            zValue: -33.4, 
+            penPick: [ 'G0 Y60', 'G0 X612.8Z-26.3', 'G0 Y2.6', 'G0 Z-16', 'G0 Y60', 'G0 X420' ],
+            penDrop: [ 'G0 Y60', 'G0 X612.8Z-16', 'G0 Y2.6', 'G0 Z-26.3', 'G0 Y60' ]
         },
         { 
             color: '#ffa500', 
             name: 'Orange', 
-            zValue: -33.3, 
-            penPick: [ 'G0 Y50', 'G0 X799.9','G0 Z-26.3', 'G0 Y2.6', 'G0 Z-16', 'G0 Y50', 'G0 X420' ],
-            penDrop: [ 'G0 Y50', 'G0 X799.9Z-16', 'G0 Y2.6', 'G0 Z-26.3', 'G0 Y50' ]
+            zValue: -33.4, 
+            penPick: [ 'G0 Y60', 'G0 X574.7Z-26.3', 'G0 Y2.8', 'G0 Z-16', 'G0 Y60', 'G0 X420' ],
+            penDrop: [ 'G0 Y60', 'G0 X574.7Z-16', 'G0 Y2.8', 'G0 Z-26.3', 'G0 Y60' ]
         },
         { 
             color: '#ff0000', 
             name: 'Red', 
-            zValue: -33.3, 
-            penPick: [ 'G0 Y50', 'G0 X799.9','G0 Z-26.3', 'G0 Y2.6', 'G0 Z-16', 'G0 Y50', 'G0 X420' ],
-            penDrop: [ 'G0 Y50', 'G0 X799.9Z-16', 'G0 Y2.6', 'G0 Z-26.3', 'G0 Y50' ]
+            zValue: -33.4, 
+            penPick: [ 'G0 Y60', 'G0 X536.6Z-26.3', 'G0 Y2.9', 'G0 Z-16', 'G0 Y60', 'G0 X420' ],
+            penDrop: [ 'G0 Y60', 'G0 X536.6Z-16', 'G0 Y2.9', 'G0 Z-26.3', 'G0 Y60' ]
         },
     ]);
     const [ config, setConfig ] = useState({
         // url: window.location.hostname,
         url: 'plotter.local',
-        feedRate: 4000,
-        jogSpeed: 12000,
+        feedRate: 5000,
+        jogSpeed: 10000,
         zOffset: 5,
         open: false
     });
@@ -223,7 +224,8 @@ export const CommunicationProvider = ({ children }) => {
         if (response.pageId === '') return;
 
         console.log('Page ID Recieved :', response.pageId)
-        sendToMachine('$H\n$Report/interval=50');
+        // sendToMachine('$H\n$Report/interval=50');
+        sendToMachine('$Report/interval=50');
 
         dotRef.current = new Path('M50 25L33.0449 23.598L29 21L26.6495 17.4012L25 0L23.5202 17.4012L21 21L16.9526 23.598L0 25L16.9526 26.7276L21 29.5L23.5203 33.5116L25 50L26.6495 33.4929L29 29.5L33.0449 26.7276L50 25Z', {
             // stroke: '#2a334e28', 
@@ -336,6 +338,15 @@ export const CommunicationProvider = ({ children }) => {
                     case key === 'error' && value === 8:
                         handleSocketMessage('The Machine is in Alarm state \nChanging...\n', '$X');
                         break;
+                    case key === 'error' && value === 152:
+                        handleSocketMessage('Boot Error \nRestarting...\n', '$bye');
+                        setTimeout(() => {
+                            ws.close();
+                            setJob({ ...job, connected: false})
+                            setWs(null);
+                            // setRestarting(true)
+                        }, [5000])
+                        break;
                     case key === 'ALARM' && value === 1:
                         handleSocketMessage('Hard Limit Triggered \nRe-Homing...\n', '$H');
                         break;
@@ -413,6 +424,7 @@ export const CommunicationProvider = ({ children }) => {
                 openSocket,
                 closeSocket,
                 sendToMachine,
+                // restarting
             }}
         >
             { children }

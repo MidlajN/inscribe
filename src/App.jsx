@@ -1,5 +1,5 @@
 import './App.css'
-import { Logo, Pen, Eraser, ArrowLeft, Pan, ArrowUp, Home, Cross, Report, Pause, Stop, Resume } from './icons'
+import { Logo, Pen, Eraser, ArrowLeft, Pan, ArrowUp, Home, Cross, Report, Pause, Stop, Resume, Refresh } from './icons'
 import useCanvas, { useCom } from './context'
 import { useEffect, useState , useRef } from 'react';
 import { PencilBrush,  } from 'fabric';
@@ -32,7 +32,7 @@ function App() {
           className='canvas-container' 
         >
           <TransformWrapper
-            initialScale={0.75} 
+            initialScale={1} 
             maxScale={1}
             minScale={.3} 
             panning={ !pan ? { excluded: ['fabricCanvas'] } : null }
@@ -63,6 +63,7 @@ export default App
 // eslint-disable-next-line react/prop-types
 function SetUp({ pan, setPan }) {
   const { colors, openSocket, job, ws } = useCom();
+  const { canvas } = useCanvas();
 
   const [ stroke, setStroke ] = useState('#5e5e5e');
   const [ tool, setTool ] = useState('Pen');
@@ -77,10 +78,9 @@ function SetUp({ pan, setPan }) {
   useEffect(() => { 
     if (ws) return;
     if (!job.connected) {
-      console.log('Not Connected :: connecting....', job)
       // openSocket()
     }
-  }, [ws, job, openSocket])
+  }, [ws, job.connected, openSocket])
 
   return (
     <>
@@ -102,6 +102,19 @@ function SetUp({ pan, setPan }) {
           }}
           >
           <Eraser width={25} height={25}/>
+        </div>
+        <div 
+          className='p-2 shadow-inner bg-[#fafafa] hover:bg-[#ebebeb] active:bg-[#fafafa] rounded-full transition-all duration-100'
+          onClick={() => {
+            canvas.getObjects().forEach((obj) => {
+              if (obj.get('name') !== 'ToolHead' && obj.get('name') !== 'BedSize') {
+                canvas.remove(obj);
+              }
+            });
+            canvas.renderAll();
+          }}
+          >
+          <Refresh width={20} height={20} />
         </div>
         <div 
           className='p-0.5'
@@ -160,15 +173,16 @@ const Configs = () => {
   }
 
   const plot = async () => {
-    const groupedObjects = returnGroupedObjects(canvas);
-    const svgElements = returnSvgElements(groupedObjects, canvas.getWidth(), canvas.getHeight());
+    const groupedObjects = await returnGroupedObjects(canvas);
+    console.log('objects "" ,', groupedObjects)
+    const svgElements = returnSvgElements(groupedObjects, 800 * 96 / 25.4, 540 * 96 / 25.4);
     sortSvgElements(svgElements, colors);
     console.log(svgElements);
 
     const gcodes = await convertToGcode(svgElements, colors, config);
     console.log('Generated G-Code : ', gcodes.join('\n'));
 
-    uploadToMachine(gcodes);
+    // uploadToMachine(gcodes);
   }
 
   const textareaRef = useRef(null)
@@ -183,19 +197,22 @@ const Configs = () => {
     <>
       <div className='absolute right-8 top-7 z-10 overflow-hidden'>
         <div 
-          className='flex justify-between items-center min-w-[15rem] rounded-md'
-          style={{ backgroundColor: job.started ? '#0f4c7d' : '#095D6C'}}
+          className='flex justify-between items-center min-w-[15rem] rounded-md cursor-pointer'
+          style={{ 
+            backgroundColor: job.started ? '#0f4c7d' : '#095D6C',
+            opacity: ws && job.connected ? '1': '0.6',
+          }}
         >
-          <div className='px-4 border-r border-[#ffffff3d] hover:border-[#6c36093d] cursor-pointer' onClick={() => { setOpen(!open) }}>
+          <div className='px-4 border-r border-[#ffffff3d] hover:border-[#6c36093d]' onClick={() => { setOpen(!open) }}>
             <ArrowUp width={20} height={20} style={{ rotate: open ? '' : '180deg'}} className={'transition-all duration-500'} />
           </div>
           <div 
             className='group p-1 flex items-center gap-1 cursor-pointer rounded-md' 
-            onClick={() => { if (ws && !job.started) plot(); }}
+            onClick={() => { plot(); }}
           >
             { !job.started ? (
               <>
-                <p className='text-[#fff] text-sm px-9 font-bold tracking-wide'>Print Now</p>
+                <p className='text-[#fff] text-sm px-9 font-bold tracking-wide'>{ ws ? 'Print Now' : 'Connecting'}</p>
                 <div className='border bg-[#116d7e] group-hover:bg-[#116d7e] group-active:bg-[#1e5863] p-3 rounded-md border-[#1a6a79] transition-all duration-500'>
                   <ArrowLeft width={8} height={8} color={'#fff'} />
                 </div>
@@ -216,9 +233,9 @@ const Configs = () => {
                     <Pause width={8} height={8} />
                   )}
                 </div>
-                <div className='p-3 bg-[#085da2] rounded-md transition-all duration-500 hover:bg-[#085da2] active:bg-[#1a4e79] focus:outline-none focus:ring focus:ring-[#0f4c7d]'>
+                {/* <div className='p-3 bg-[#085da2] rounded-md transition-all duration-500 hover:bg-[#085da2] active:bg-[#1a4e79] focus:outline-none focus:ring focus:ring-[#0f4c7d]'>
                   <Stop width={8} height={8} />
-                </div>
+                </div> */}
               </>
             )}
           </div>
