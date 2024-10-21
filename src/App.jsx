@@ -1,5 +1,5 @@
 import './App.css'
-import { Logo, Pen, Eraser, ArrowLeft, Pan, ArrowUp, Home, Cross, Report, Pause, Stop, Resume, Refresh } from './icons'
+import { Logo, Pen, Eraser, ArrowLeft, Pan, ArrowUp, Home, Cross, Report, Pause, Stop, Resume, Refresh, Settings } from './icons'
 import useCanvas, { useCom } from './context'
 import { useEffect, useState , useRef } from 'react';
 import { PencilBrush,  } from 'fabric';
@@ -32,7 +32,7 @@ function App() {
           className='canvas-container' 
         >
           <TransformWrapper
-            initialScale={1} 
+            initialScale={0.75} 
             maxScale={1}
             minScale={.3} 
             panning={ !pan ? { excluded: ['fabricCanvas'] } : null }
@@ -116,7 +116,7 @@ function SetUp({ pan, setPan }) {
           >
           <Refresh width={20} height={20} />
         </div>
-        <div 
+        {/* <div 
           className='p-0.5'
           style={{ borderBottom: tool === 'Pan' ? '2px solid #ff965b' : null}}
           onClick={() => {
@@ -124,7 +124,7 @@ function SetUp({ pan, setPan }) {
           }}
           >
           <Pan width={25} height={25} />
-        </div>
+        </div> */}
         { colors.map((color, index) => (
           <div 
             key={index}
@@ -148,7 +148,7 @@ function SetUp({ pan, setPan }) {
 
 const Configs = () => {
   const [ open, setOpen ] = useState(false);
-  const { colors, config, job, setJob, ws, response, sendToMachine } = useCom();
+  const { colors, config, job, setJob, ws, response, sendToMachine, setProgress, progress } = useCom();
   const { canvas } = useCanvas();
 
   const uploadToMachine = async (gcode) => {
@@ -158,6 +158,9 @@ const Configs = () => {
     formData.append('file', file);
 
     try {
+      setProgress({ uploading: true, converting: false, progress: 80  });
+      // await delay(500);
+
       const response =  await fetch(`http://${ config.url }/upload`, {
         method: 'POST',
         body: formData
@@ -166,6 +169,8 @@ const Configs = () => {
       console.log('Request Send Successfully :', data);
 
       sendToMachine(`[ESP220]/${file.name}`);
+
+      setProgress({ uploading: false, converting: false, progress: 100  });
       setJob({ ...job, started:  true});
     } catch  (err) {
       console.log('Error While Uploading : ', err);
@@ -173,15 +178,20 @@ const Configs = () => {
   }
 
   const plot = async () => {
+    setProgress({ uploading: false, converting: true, progress: 10 });
+    setJob({ ...job, connected: true });
+
     const groupedObjects = await returnGroupedObjects(canvas);
-    console.log('objects "" ,', groupedObjects)
+
     const svgElements = returnSvgElements(groupedObjects, canvas.getWidth(), canvas.getHeight());
     sortSvgElements(svgElements, colors);
-    console.log(svgElements);
+
+    setProgress({ uploading: false, converting: true, progress: 40 });
 
     const gcodes = await convertToGcode(svgElements, colors, config);
-    console.log('Generated G-Code : ', gcodes.join('\n'));
+    console.log('Gcode Generated : \n', gcodes.join('\n'))
 
+    setProgress({ uploading: false, converting: true, progress: 80 });
     uploadToMachine(gcodes);
   }
 
@@ -206,16 +216,39 @@ const Configs = () => {
           <div className='px-4 border-r border-[#ffffff3d] hover:border-[#6c36093d]' onClick={() => { setOpen(!open) }}>
             <ArrowUp width={20} height={20} style={{ rotate: open ? '' : '180deg'}} className={'transition-all duration-500'} />
           </div>
-          <div 
-            className='group p-1 flex items-center gap-1 cursor-pointer rounded-md' 
-            onClick={() => { if (ws && !job.started) plot(); }}
-          >
+          <div className='group p-1 flex items-center gap-1 cursor-pointer rounded-md' >
             { !job.started ? (
               <>
-                <p className='text-[#fff] text-sm px-9 font-bold tracking-wide'>{ ws ? 'Print Now' : 'Connecting'}</p>
-                <div className='border bg-[#116d7e] group-hover:bg-[#116d7e] group-active:bg-[#1e5863] p-3 rounded-md border-[#1a6a79] transition-all duration-500'>
-                  <ArrowLeft width={8} height={8} color={'#fff'} />
-                </div>
+                { progress.converting ? (
+                  <div className='w-full h-full flex items-center justify-center gap-1 '>
+                    <p className='text-[#fff] text-sm px-9 font-bold tracking-wide'>Converting...</p>
+                    <div className='border bg-[#116d7e] group-hover:bg-[#116d7e] group-active:bg-[#1e5863] p-[10px] rounded-md border-[#1a6a79] transition-all duration-500'>
+                      <Settings width={12} height={12} color={'#fff'} className={'animate-spin'}  />
+                    </div>
+                  </div>
+                ):(
+                  <>
+                  { progress.uploading ? (
+                    <div className='w-full h-full flex items-center gap-1 '>
+                      <p className='text-[#fff] text-sm px-9 font-bold tracking-wide'>Uploading...</p>
+                      <div className='border bg-[#116d7e] group-hover:bg-[#116d7e] group-active:bg-[#1e5863] p-[10px] rounded-md border-[#1a6a79] transition-all duration-500'>
+                        <Settings width={12} height={12} color={'#fff'} className={'animate-spin'} />
+                      </div>
+                    </div>
+                  ): (
+                    
+                    <>
+                    <div className='w-full h-full flex items-center gap-1 ' onClick={() => { if (ws  && job.connected) plot(); }}>
+                      <p className='text-[#fff] text-sm px-9 font-bold tracking-wide'>{ ws && job.connected ? 'Print Now' : 'Connecting'}</p>
+                      <div className='border bg-[#116d7e] group-hover:bg-[#116d7e] group-active:bg-[#1e5863] p-3 rounded-md border-[#1a6a79] transition-all duration-500'>
+                        <ArrowLeft width={8} height={8} color={'#fff'} />
+                      </div>
+                    </div>
+                    </>
+                    
+                  )}
+                  </>
+                )}
               </>
             ):(
               <>
@@ -233,9 +266,9 @@ const Configs = () => {
                     <Pause width={8} height={8} />
                   )}
                 </div>
-                {/* <div className='p-3 bg-[#085da2] rounded-md transition-all duration-500 hover:bg-[#085da2] active:bg-[#1a4e79] focus:outline-none focus:ring focus:ring-[#0f4c7d]'>
-                  <Stop width={8} height={8} />
-                </div> */}
+                <div className='p-2 bg-[#085da2] rounded-md transition-all duration-500 hover:bg-[#085da2] active:bg-[#1a4e79] focus:outline-none focus:ring focus:ring-[#0f4c7d]'>
+                  <p className='text-xs text-white'>{ job.percentage }%</p>
+                </div>
               </>
             )}
           </div>

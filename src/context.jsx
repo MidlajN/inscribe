@@ -65,7 +65,7 @@ export function useCom() {
 export const CommunicationProvider = ({ children }) => {
     const { canvas } = useCanvas()
     const [ response, setResponse ] = useState({ pageId: '', message: '' });
-    const [ job, setJob ] = useState({ connecting: false, connected: false, started: false, paused: false, percentage: null });
+    const [ job, setJob ] = useState({ connecting: false, connected: false, started: false, paused: false, percentage: 0 });
     const [ progress, setProgress ] = useState({ uploading: false, converting: false, progress: 0 })
     const [ setupModal, setSetupModal ] = useState(false);
     // const [ restarting , setRestarting ] = useState(false);
@@ -131,7 +131,7 @@ export const CommunicationProvider = ({ children }) => {
     const [ config, setConfig ] = useState({
         // url: window.location.hostname,
         url: 'plotter.local',
-        feedRate: 5000,
+        feedRate: 7000,
         jogSpeed: 10000,
         zOffset: 5,
         open: false
@@ -290,15 +290,15 @@ export const CommunicationProvider = ({ children }) => {
                 //     top: (550 - y) * 96 / 25.4,
                 //     left: x * 96 / 25.4,
                 // });
-                dotRef.current.set({
-                    top: (297 - y) * 96 / 25.4,
-                    left: x * 96 / 25.4,
-                });
-                canvas.renderAll();
+                // dotRef.current.set({
+                //     top: (297 - y) * 96 / 25.4,
+                //     left: x * 96 / 25.4,
+                // });
+                // canvas.renderAll();
 
                 console.log(`Status: ${status}\nX: ${x} Y: ${y} Z: ${z} Feed: ${feed}\n`);
             } else {
-                if (message.includes('/job.gcode job sent')) {
+                if (message.includes('/job.gcode job sent') || job.percentage === 100) {
                     console.log('The Indicator found', job);
 
                     // setTimeout(() => { setJob({ ...job, connecting: false, connected: true, percentage: 100 }) }, 5000)
