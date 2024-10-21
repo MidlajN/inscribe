@@ -78,7 +78,7 @@ function SetUp({ pan, setPan }) {
   useEffect(() => { 
     if (ws) return;
     if (!job.connected) {
-      // openSocket()
+      openSocket()
     }
   }, [ws, job.connected, openSocket])
 
@@ -147,7 +147,7 @@ function SetUp({ pan, setPan }) {
 }
 
 const Configs = () => {
-  const [ open, setOpen ] = useState(true);
+  const [ open, setOpen ] = useState(false);
   const { colors, config, job, setJob, ws, response, sendToMachine } = useCom();
   const { canvas } = useCanvas();
 
@@ -175,14 +175,14 @@ const Configs = () => {
   const plot = async () => {
     const groupedObjects = await returnGroupedObjects(canvas);
     console.log('objects "" ,', groupedObjects)
-    const svgElements = returnSvgElements(groupedObjects, 800 * 96 / 25.4, 540 * 96 / 25.4);
+    const svgElements = returnSvgElements(groupedObjects, canvas.getWidth(), canvas.getHeight());
     sortSvgElements(svgElements, colors);
     console.log(svgElements);
 
     const gcodes = await convertToGcode(svgElements, colors, config);
     console.log('Generated G-Code : ', gcodes.join('\n'));
 
-    // uploadToMachine(gcodes);
+    uploadToMachine(gcodes);
   }
 
   const textareaRef = useRef(null)
@@ -208,7 +208,7 @@ const Configs = () => {
           </div>
           <div 
             className='group p-1 flex items-center gap-1 cursor-pointer rounded-md' 
-            onClick={() => { plot(); }}
+            onClick={() => { if (ws && !job.started) plot(); }}
           >
             { !job.started ? (
               <>

@@ -75,57 +75,57 @@ export const CommunicationProvider = ({ children }) => {
             color: '#ffff00', 
             name: 'Yellow', 
             zValue: -33.4, 
-            penPick: [ 'G0 Y50', 'G0 X799.9Z-26.3', 'G0 Y1.2', 'G0 Z-16', 'G0 Y60', 'G0 X420' ],
-            penDrop: [ 'G0 Y50', 'G0 X799.9Z-16', 'G0 Y1.2', 'G0 Z-26.3', 'G0 Y50' ]
+            penPick: [ 'G53 Y50', 'G53 X799.9Z-26.3', 'G53 Y1.2', 'G53 Z-16', 'G53 Y60', 'G53 X420' ],
+            penDrop: [ 'G53 Y50', 'G53 X799.9Z-16', 'G53 Y1.2', 'G53 Z-26.3', 'G53 Y50' ]
         },
         { 
             color: '#008000', 
             name: 'Green', 
             zValue: -33.4, 
-            penPick: [ 'G0 Y60', 'G0 X763.3Z-26.3', 'G0 Y1.2', 'G0 Z-16', 'G0 Y60', 'G0 X420' ],
-            penDrop: [ 'G0 Y60', 'G0 X763.3Z-16', 'G0 Y1.2', 'G0 Z-26.3', 'G0 Y60' ]
+            penPick: [ 'G53 Y60', 'G53 X763.3Z-26.3', 'G53 Y1.2', 'G53 Z-16', 'G53 Y60', 'G53 X420' ],
+            penDrop: [ 'G53 Y60', 'G53 X763.3Z-16', 'G53 Y1.2', 'G53 Z-26.3', 'G53 Y60' ]
         },
         { 
             color: '#5e5e5e', 
             name: 'Gray', 
             zValue: -33.4, 
-            penPick: [ 'G0 Y60', 'G0 X724.8Z-26.3', 'G0 Y1.2', 'G0 Z-16', 'G0 Y60', 'G0 X420' ],
-            penDrop: [ 'G0 Y60', 'G0 X724.8Z-16', 'G0 Y1.2', 'G0 Z-26.3', 'G0 Y60' ]
+            penPick: [ 'G53 Y60', 'G53 X724.8Z-26.3', 'G53 Y1.2', 'G53 Z-16', 'G53 Y60', 'G53 X420' ],
+            penDrop: [ 'G53 Y60', 'G53 X724.8Z-16', 'G53 Y1.2', 'G53 Z-26.3', 'G53 Y60' ]
         },
         { 
             color: '#227fe3', 
             name: 'Blue', 
             zValue: -33.4, 
-            penPick: [ 'G0 Y60', 'G0 X687.3Z-26.3', 'G0 Y1.2', 'G0 Z-16', 'G0 Y60', 'G0 X420' ],
-            penDrop: [ 'G0 Y60', 'G0 X687.3Z-16', 'G0 Y1.2', 'G0 Z-26.3', 'G0 Y60' ] 
+            penPick: [ 'G53 Y60', 'G53 X687.3Z-26.3', 'G53 Y1.2', 'G53 Z-16', 'G53 Y60', 'G53 X420' ],
+            penDrop: [ 'G53 Y60', 'G53 X687.3Z-16', 'G53 Y1.2', 'G53 Z-26.3', 'G53 Y60' ] 
         },
         { 
             color: '#a020f0', 
             name: 'Purple', 
             zValue: -33.4, 
-            penPick: [ 'G0 Y60', 'G0 X650.9Z-26.3', 'G0 Y2.6', 'G0 Z-16', 'G0 Y60', 'G0 X420' ],
-            penDrop: [ 'G0 Y60', 'G0 X650.9Z-16', 'G0 Y2.6', 'G0 Z-26.3', 'G0 Y60' ]
+            penPick: [ 'G53 Y60', 'G53 X650.9Z-26.3', 'G53 Y2.6', 'G53 Z-16', 'G53 Y60', 'G53 X420' ],
+            penDrop: [ 'G53 Y60', 'G53 X650.9Z-16', 'G53 Y2.6', 'G53 Z-26.3', 'G53 Y60' ]
         },
         { 
             color: '#ffc0cb', 
             name: 'Pink', 
             zValue: -33.4, 
-            penPick: [ 'G0 Y60', 'G0 X612.8Z-26.3', 'G0 Y2.6', 'G0 Z-16', 'G0 Y60', 'G0 X420' ],
-            penDrop: [ 'G0 Y60', 'G0 X612.8Z-16', 'G0 Y2.6', 'G0 Z-26.3', 'G0 Y60' ]
+            penPick: [ 'G53 Y60', 'G53 X612.8Z-26.3', 'G53 Y2.6', 'G53 Z-16', 'G53 Y60', 'G53 X420' ],
+            penDrop: [ 'G53 Y60', 'G53 X612.8Z-16', 'G53 Y2.6', 'G53 Z-26.3', 'G53 Y60' ]
         },
         { 
             color: '#ffa500', 
             name: 'Orange', 
             zValue: -33.4, 
-            penPick: [ 'G0 Y60', 'G0 X574.7Z-26.3', 'G0 Y2.8', 'G0 Z-16', 'G0 Y60', 'G0 X420' ],
-            penDrop: [ 'G0 Y60', 'G0 X574.7Z-16', 'G0 Y2.8', 'G0 Z-26.3', 'G0 Y60' ]
+            penPick: [ 'G53 Y60', 'G53 X574.7Z-26.3', 'G53 Y2.8', 'G53 Z-16', 'G53 Y60', 'G53 X420' ],
+            penDrop: [ 'G53 Y60', 'G53 X574.7Z-16', 'G53 Y2.8', 'G53 Z-26.3', 'G53 Y60' ]
         },
         { 
             color: '#ff0000', 
             name: 'Red', 
             zValue: -33.4, 
-            penPick: [ 'G0 Y60', 'G0 X536.6Z-26.3', 'G0 Y2.9', 'G0 Z-16', 'G0 Y60', 'G0 X420' ],
-            penDrop: [ 'G0 Y60', 'G0 X536.6Z-16', 'G0 Y2.9', 'G0 Z-26.3', 'G0 Y60' ]
+            penPick: [ 'G53 Y60', 'G53 X536.6Z-26.3', 'G53 Y2.9', 'G53 Z-16', 'G53 Y60', 'G53 X420' ],
+            penDrop: [ 'G53 Y60', 'G53 X536.6Z-16', 'G53 Y2.9', 'G53 Z-26.3', 'G53 Y60' ]
         },
     ]);
     const [ config, setConfig ] = useState({
