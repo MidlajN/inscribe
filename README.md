@@ -1,15 +1,14 @@
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
-
 <p align="center">
 
-<img width="60" height="68" alt="Inscribe Logo" src=""/>
+<img width="100" height="50" alt="Inscribe Logo" src="https://github.com/user-attachments/assets/f76cc3b9-e328-4c02-8a0b-8387817824d6"/>
 </p>
 <p align="center">
-
   <h1 align="center">Incsribe</h1>
 </p>
 
-This project is a Vite + React application that serves as a frontend for a Fabric.js canvas. It allows users to draw freely and send their drawings to a plotter using FluidNC. The application supports automatic pen selection with G-code commands for handling multiple colors.
+A Vite + React app designed for drawing on a Fabric.js canvas. Users can draw freely and send their artwork to a plotter controlled by FluidNC. It automatically selects the right pen for each color using G-code commands. The user interface is optimized for iPad and similar devices.
+
 
 ## Features
 
@@ -24,8 +23,6 @@ This project is a Vite + React application that serves as a frontend for a Fabri
 3. [Plotter Setup](#plotter-setup)
 4. [Configuration](#configuration)
 5. [Development](#development)
-6. [Contributing](#contributing)
-7. [License](#license)
 
 ## Installation
 
@@ -138,15 +135,3 @@ To modify the project:
   ```bash
   npm run build
   ```
-
-## Contributing
-
-Contributions are welcome! Please refer to our [CONTRIBUTING.md](CONTRIBUTING.md) guide for more details.
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more information.
-
----
-
-This updated README provides clarity on the pen selection and plotting functionalities while maintaining a clear structure for installation and usage.
