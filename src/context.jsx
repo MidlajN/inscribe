@@ -35,11 +35,25 @@ export const CanvasProvider = ({ children }) => {
             stopContextMenu: true,
             centeredRotation: true,
         });
-          
-        fabricCanvas.renderAll()
 
+        const savedCanvas = localStorage.getItem('fabricCanvas');
+        if (savedCanvas) {
+            fabricCanvas.loadFromJSON(savedCanvas, fabricCanvas.renderAll.bind(fabricCanvas))
+        }
+          
         setCanvas(fabricCanvas);
-        return () => fabricCanvas.dispose();
+
+        const saveCanvasState = () => {
+            const canvasState = fabricCanvas.toJSON();
+            localStorage.setItem('fabricCanvas', JSON.stringify(canvasState));
+        };
+
+        window.addEventListener('beforeunload', saveCanvasState);
+
+        return () => {
+            window.removeEventListener('beforeunload', saveCanvasState);
+            fabricCanvas.dispose();
+        };
     }, []);
 
     useEffect(() => {
@@ -129,8 +143,8 @@ export const CommunicationProvider = ({ children }) => {
         },
     ]);
     const [ config, setConfig ] = useState({
-        // url: window.location.hostname,
-        url: 'plotter.local',
+        url: window.location.hostname,
+        // url: 'plotter.local',
         feedRate: 7000,
         jogSpeed: 10000,
         zOffset: 5,

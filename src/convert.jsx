@@ -139,6 +139,7 @@ export const convertToGcode = async (svgElements, colors, config) => {
             tolerance: 0.1,
             ignoreNegative: true,
             minimumArea: 2.5,
+            sortByArea: false,
             bedSize: {
                 width: 800,
                 height: 540

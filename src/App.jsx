@@ -219,35 +219,20 @@ const Configs = () => {
           <div className='group p-1 flex items-center gap-1 cursor-pointer rounded-md' >
             { !job.started ? (
               <>
-                { progress.converting ? (
-                  <div className='w-full h-full flex items-center justify-center gap-1 '>
-                    <p className='text-[#fff] text-sm px-9 font-bold tracking-wide'>Converting...</p>
+                { progress.converting || progress.uploading ? (
+                  <div className='w-full h-full flex items-center gap-1 '>
+                    <p className='text-[#fff] text-sm px-9 font-bold tracking-wide'>Uploading...</p>
                     <div className='border bg-[#116d7e] group-hover:bg-[#116d7e] group-active:bg-[#1e5863] p-[10px] rounded-md border-[#1a6a79] transition-all duration-500'>
-                      <Settings width={12} height={12} color={'#fff'} className={'animate-spin'}  />
+                      <Settings width={12} height={12} color={'#fff'} className={'animate-spin'} />
                     </div>
                   </div>
                 ):(
-                  <>
-                  { progress.uploading ? (
-                    <div className='w-full h-full flex items-center gap-1 '>
-                      <p className='text-[#fff] text-sm px-9 font-bold tracking-wide'>Uploading...</p>
-                      <div className='border bg-[#116d7e] group-hover:bg-[#116d7e] group-active:bg-[#1e5863] p-[10px] rounded-md border-[#1a6a79] transition-all duration-500'>
-                        <Settings width={12} height={12} color={'#fff'} className={'animate-spin'} />
-                      </div>
+                  <div className='w-full h-full flex items-center gap-1 ' onClick={() => { if ( ws && job.connected ) plot(); }}>
+                    <p className='text-[#fff] text-sm px-9 font-bold tracking-wide'>{ ws && job.connected ? 'Print Now' : 'Connecting'}</p>
+                    <div className='border bg-[#116d7e] group-hover:bg-[#116d7e] group-active:bg-[#1e5863] p-3 rounded-md border-[#1a6a79] transition-all duration-500'>
+                      <ArrowLeft width={8} height={8} color={'#fff'} />
                     </div>
-                  ): (
-                    
-                    <>
-                    <div className='w-full h-full flex items-center gap-1 ' onClick={() => { if (ws  && job.connected) plot(); }}>
-                      <p className='text-[#fff] text-sm px-9 font-bold tracking-wide'>{ ws && job.connected ? 'Print Now' : 'Connecting'}</p>
-                      <div className='border bg-[#116d7e] group-hover:bg-[#116d7e] group-active:bg-[#1e5863] p-3 rounded-md border-[#1a6a79] transition-all duration-500'>
-                        <ArrowLeft width={8} height={8} color={'#fff'} />
-                      </div>
-                    </div>
-                    </>
-                    
-                  )}
-                  </>
+                  </div>
                 )}
               </>
             ):(
