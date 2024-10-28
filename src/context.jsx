@@ -16,6 +16,10 @@ export const CanvasProvider = ({ children }) => {
     const canvasRef = useRef(null);
     const [ canvas, setCanvas ] = useState(null);
     const [ copiedObject, setCopiedObject ] = useState(null);
+        
+    let undoStack = [];
+    let redoStack = [];
+    let isUndoRedo = false;
     
     useEffect(() => {
         FabricObject.ownDefaults.cornerStyle = 'circle';
@@ -56,6 +60,59 @@ export const CanvasProvider = ({ children }) => {
         };
     }, []);
 
+    const saveState = () => {
+        if (isUndoRedo) return;
+        redoStack = [];
+        const currentState = JSON.stringify(canvas);
+        console.log('Current State ', JSON.parse(currentState))
+        undoStack.push(currentState);
+        if (undoStack.length > 15) undoStack.shift()
+    }
+
+    const undo = () => {
+        if (undoStack.length > 1) {
+            const currentState = undoStack.pop();
+            redoStack.push(currentState)
+            isUndoRedo = true
+
+            canvas.loadFromJSON(undoStack[undoStack.length - 1]).then(() => {
+                canvas.renderAll();
+                isUndoRedo = false;
+            })
+        }
+    }
+
+    const redo = () => {
+        if (redoStack.length > 0) {
+            const stateToRedo = redoStack.pop();
+            undoStack.push(stateToRedo);
+            isUndoRedo = true
+            
+            canvas.loadFromJSON(stateToRedo).then(() => {
+                canvas.renderAll();
+                isUndoRedo = false;
+            })
+        }
+    }
+
+    
+    useEffect(() => {
+        if (!canvas) return ;
+
+        saveState()
+
+        canvas.on('object:added', saveState);
+        canvas.on('object:modified', saveState);
+        canvas.on('object:removed', saveState);
+
+        return () => {
+            canvas.off('object:added', saveState);
+            canvas.off('object:modified', saveState);
+            canvas.off('object:removed', saveState);
+        }
+    }, [canvas])
+
+
     useEffect(() => {
         window.addEventListener('keydown', handleKeyDown( copiedObject, setCopiedObject, canvas ));
         return () => window.removeEventListener('keydown', handleKeyDown);
@@ -63,7 +120,7 @@ export const CanvasProvider = ({ children }) => {
     }, [canvas, copiedObject]);
 
     return (
-        <CanvasContext.Provider value={{ canvas, canvasRef }}>
+        <CanvasContext.Provider value={{ canvas, canvasRef, redo, undo }}>
             { children }
         </CanvasContext.Provider>
     );

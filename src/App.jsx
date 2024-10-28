@@ -1,5 +1,5 @@
 import './App.css'
-import { Logo, Pen, Eraser, ArrowLeft, Pan, ArrowUp, Home, Cross, Report, Pause, Stop, Resume, Refresh, Settings } from './icons'
+import { Logo, Pen, Eraser, ArrowLeft, ArrowUp, Home, Cross, Report, Pause, Resume, Refresh, Settings, Undo, Redo } from './icons'
 import useCanvas, { useCom } from './context'
 import { useEffect, useState , useRef } from 'react';
 import { PencilBrush,  } from 'fabric';
@@ -63,7 +63,7 @@ export default App
 // eslint-disable-next-line react/prop-types
 function SetUp({ pan, setPan }) {
   const { colors, openSocket, job, ws } = useCom();
-  const { canvas } = useCanvas();
+  const { canvas, redo, undo } = useCanvas();
 
   const [ stroke, setStroke ] = useState('#5e5e5e');
   const [ tool, setTool ] = useState('Pen');
@@ -105,6 +105,18 @@ function SetUp({ pan, setPan }) {
         </div>
         <div 
           className='p-2 shadow-inner bg-[#fafafa] hover:bg-[#ebebeb] active:bg-[#fafafa] rounded-full transition-all duration-100'
+          onClick={undo}
+          >
+          <Undo width={25} height={25}/>
+        </div>
+        <div 
+          className='p-2 shadow-inner bg-[#fafafa] hover:bg-[#ebebeb] active:bg-[#fafafa] rounded-full transition-all duration-100'
+          onClick={redo}
+          >
+          <Redo width={25} height={25}/>
+        </div>
+        <div 
+          className='p-3 shadow-inner bg-[#fafafa] hover:bg-[#ebebeb] active:bg-[#fafafa] rounded-full transition-all duration-100'
           onClick={() => {
             canvas.getObjects().forEach((obj) => {
               if (obj.get('name') !== 'ToolHead' && obj.get('name') !== 'BedSize') {
