@@ -71,3 +71,15 @@
   border-color: white;
   background-color: #ebeaf7;
 }
+
+
+
+.import input {
+  display: block;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  align-items: stretch;
+  opacity: 0;
+  cursor: pointer;
+}

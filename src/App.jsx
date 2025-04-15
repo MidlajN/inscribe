@@ -1,10 +1,11 @@
 import './App.css'
-import { Logo, Pen, Eraser, ArrowLeft, ArrowUp, Home, Cross, Report, Pause, Resume, Refresh, Settings, Undo, Redo } from './icons'
+import { Logo, Pen, Eraser, ArrowLeft, ArrowUp, Home, Cross, Report, Pause, Resume, Refresh, Settings, Undo, Redo, MousePointer, DownloadIcon, CameraIcon, CloseIcon } from './icons'
 import useCanvas, { useCom } from './context'
 import { useEffect, useState , useRef } from 'react';
-import { PencilBrush,  } from 'fabric';
+import { FabricImage, PencilBrush,  } from 'fabric';
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 import { convertToGcode, returnGroupedObjects, returnSvgElements, sortSvgElements } from './convert';
+import { handleFile } from './functions';
 
 function App() { 
   const { canvasRef } = useCanvas();
@@ -35,7 +36,7 @@ function App() {
             initialScale={0.75} 
             maxScale={1}
             minScale={.3} 
-            panning={ !pan ? { excluded: ['fabricCanvas'] } : null }
+            panning={ pan ? { excluded: ['fabricCanvas'] } : null }
             centerOnInit 
             limitToBounds={ !pan }
             velocityAnimation={false}
@@ -67,6 +68,7 @@ function SetUp({ pan, setPan }) {
 
   const [ stroke, setStroke ] = useState('#5e5e5e');
   const [ tool, setTool ] = useState('Pen');
+  const [ streaming, setStreaming ] = useState(true);
 
   useEditorSetup({ 
     stroke: stroke,
@@ -75,16 +77,25 @@ function SetUp({ pan, setPan }) {
     setPan: setPan
   });
 
-  useEffect(() => { 
-    if (ws) return;
-    if (!job.connected) {
-      openSocket()
-    }
-  }, [ws, job.connected, openSocket])
+  // useEffect(() => { 
+  //   if (ws) return;
+  //   if (!job.connected) {
+  //     openSocket()
+  //   }
+  // }, [ws, job.connected, openSocket])
 
   return (
     <>
       <div className='setup'>
+        <div
+          className='p-0.5'
+          style={{ borderBottom: tool === 'Select' ? '2px solid #ff965b' : null}}
+          onClick={() => {
+            setTool('Select');
+          }}
+        >
+            <MousePointer width={25} height={25}/>
+        </div>
         <div
           className='p-0.5'
           style={{ borderBottom: tool === 'Pen' ? '2px solid #ff965b' : null}}
@@ -102,6 +113,13 @@ function SetUp({ pan, setPan }) {
           }}
           >
           <Eraser width={25} height={25}/>
+        </div>
+        <div 
+          className='p-2 shadow-inner bg-[#fafafa] hover:bg-[#ebebeb] active:bg-[#fafafa] rounded-full transition-all duration-100 import overflow-hidden'
+          // style={{ borderBottom: tool === 'Eraser' ? '2px solid #ff965b' : null}}
+          >
+          <input type="file" accept="image/svg+xml"  onInput={ e => handleFile(e.target.files[0], canvas) } />
+          <DownloadIcon width={23} height={23}/>
         </div>
         <div 
           className='p-2 shadow-inner bg-[#fafafa] hover:bg-[#ebebeb] active:bg-[#fafafa] rounded-full transition-all duration-100'
@@ -128,6 +146,12 @@ function SetUp({ pan, setPan }) {
           >
           <Refresh width={20} height={20} />
         </div>
+        <div 
+          className='p-3 bg-[#fafafa] hover:bg-[#ebebeb] active:bg-[#fafafa] rounded-full transition-all duration-100'
+          onClick={() => setStreaming(true)}
+          >
+          <CameraIcon width={20} height={20} />
+        </div>
         {/* <div 
           className='p-0.5'
           style={{ borderBottom: tool === 'Pan' ? '2px solid #ff965b' : null}}
@@ -153,6 +177,7 @@ function SetUp({ pan, setPan }) {
           </div>
         ))}
       </div>
+      { streaming && <VideoStreaming setStreaming={setStreaming} /> }
       <Configs /> 
     </>
   )
@@ -310,13 +335,19 @@ const useEditorSetup= ({stroke, tool, pan, setPan}) => {
     if (!canvas) return;
     setPan(false)
 
-    canvas.getObjects().forEach(obj => {
-      obj.set({
-        selectable: false
-      })
-    });
+    // canvas.getObjects().forEach(obj => {
+    //   obj.set({
+    //     selectable: false
+    //   })
+    // });
     
     if (tool === 'Pen') {
+      canvas.getObjects().forEach(obj => {
+        obj.set({
+          selectable: false
+        })
+      });
+
       canvas.isDrawingMode = true;
       canvas.freeDrawingBrush = new PencilBrush(canvas);
       canvas.freeDrawingBrush.color = stroke;
@@ -324,8 +355,18 @@ const useEditorSetup= ({stroke, tool, pan, setPan}) => {
 
       return () => { 
         canvas.isDrawingMode = false; 
+        canvas.getObjects().forEach(obj => {
+          obj.set({
+            selectable: true
+          })
+        });
       };
     } else if (tool === 'Eraser') {
+      canvas.getObjects().forEach(obj => {
+        obj.set({
+          selectable: false
+        })
+      });
       canvas.selection = false;
       let isMouseDown = false;
 
@@ -352,10 +393,15 @@ const useEditorSetup= ({stroke, tool, pan, setPan}) => {
         canvas.off('mouse:move', handleEraser) ;
         canvas.off('mouse:up');
         canvas.off('mouse:down');
+        canvas.getObjects().forEach(obj => {
+          obj.set({
+            selectable: true
+          })
+        });
       };
 
     } else {
-      // canvas.selection = true;
+      canvas.selection = true;
       setPan(true);
     }
 
@@ -374,4 +420,86 @@ const useEditorSetup= ({stroke, tool, pan, setPan}) => {
     })
     canvas.renderAll()
   }, [canvas, stroke])
+}
+
+const VideoStreaming = ({ setStreaming }) => {
+  const videoRef = useRef(null);
+  const { canvas } = useCanvas()
+
+  useEffect(() => {
+    const startStream = async () => {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      videoRef.current.srcObject = stream;
+    }
+    startStream()
+
+    return () => {
+      const stream = videoRef.current?.srcObject;
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+      }
+    }
+  }, [])
+
+  const handleCapture = () => {
+    const video = videoRef.current;
+    const drawingCanvas = document.createElement('canvas');
+    drawingCanvas.width = video.videoWidth;
+    drawingCanvas.height = video.videoHeight;
+    const ctx = drawingCanvas.getContext('2d');
+    ctx.drawImage(video, 0,0, drawingCanvas.width, drawingCanvas.height);
+    const dataUrl = drawingCanvas.toDataURL('image/png');
+
+    FabricImage.fromURL(dataUrl).then((img) => {
+      const scale = Math.min(
+        canvas.width / img.width,
+        canvas.height / img.height
+      ); 
+
+      img.set({
+        originX: 'left',
+        originY: 'top',
+        left: 0,
+        top: 0,
+        scaleX: scale,
+        scaleY: scale,
+        selectable: false,
+        evented: false,
+      });
+
+      canvas.backgroundImage = img;
+      canvas.renderAll();
+    })
+  }
+
+
+
+  return (
+    <>
+      <div className='fixed bg-[#0000002d] backdrop-blur-sm w-dvw h-dvh z-10'></div>
+      <div className='absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 z-10'>
+        <div className='flex justify-between items-center rounded-tl-md rounded-tr-md pl-3 pr-2.5 pt-2 bg-white'>
+          <p className='text-sm'>Canvas Background</p>
+          <button 
+            onClick={() => setStreaming(false)}>
+            <CloseIcon stroke={'#ff4545'} strokeWidth={2} width={17} height={17} />
+          </button>
+        </div>
+        <div className="p-3 bg-white text-center rounded-bl-md rounded-br-md">
+          <video 
+            className='rounded'
+            ref={videoRef} 
+            autoPlay 
+            playsInline 
+            style={{ width: '100%' }} />
+          <button 
+            className='bg-teal-500 flex justify-center items-center gap-1 px-2 py-1 text-sm font-medium tracking-wide text-white mx-auto rounded mt-2 mb-3'
+            onClick={handleCapture}>
+            <CameraIcon stroke={'#ffffff'} strokeWidth={2} width={17} height={17} />
+            Take Picture
+          </button>
+        </div>
+      </div>
+    </>
+  )
 }

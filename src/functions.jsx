@@ -1,4 +1,5 @@
 /* eslint-disable no-undef */
+import { loadSVGFromString, util } from 'fabric';
 import ReactDOMServer from 'react-dom/server'
 
 /**
@@ -11,19 +12,27 @@ export const handleFile = (file, canvas) => {
     if (file && file.type !== 'image/svg+xml') return;
   
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
         const svg = e.target.result;
-    
-        fabric.loadSVGFromString(svg, (objects, options) => {
-            const obj = fabric.util.groupSVGElements(objects, options);
-            console.log("Svg from file -->> \n",objects, options, obj)
 
-            // Set styles after object is loaded
-            obj.set({ selectable: true, hasControls: true, strokeWidth: 1, stroke: '#fff', fill: '#fff' });
-
-            canvas.add(obj);
-            canvas.renderAll();
-        });
+        const loadedSvg = await loadSVGFromString(svg)
+        console.log(loadedSvg)
+        loadedSvg.objects.forEach(obj => {
+            obj.set({
+                stroke: '#5e5e5e',
+                strokeWidth: 2,
+                fill: 'transparent',
+            })
+        })
+        const svgObj = util.groupSVGElements(loadedSvg.objects, loadedSvg.options);
+        svgObj.set({
+            originX: 'center',
+            originY: 'center',
+            top: canvas.getCenter().top,
+            left: canvas.getCenter().left
+        })
+        canvas.add(svgObj);
+        canvas.renderAll();
     };
     reader.readAsText(file);
 };

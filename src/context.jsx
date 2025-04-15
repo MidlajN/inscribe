@@ -38,6 +38,7 @@ export const CanvasProvider = ({ children }) => {
             fireRightClick: true,
             stopContextMenu: true,
             centeredRotation: true,
+            perPixelTargetFind: true
         });
 
         const savedCanvas = localStorage.getItem('fabricCanvas');
@@ -184,20 +185,20 @@ export const CommunicationProvider = ({ children }) => {
             penPick: [ 'G53 Y60', 'G53 X612.8Z-26.3', 'G53 Y2.6', 'G53 Z-16', 'G53 Y60', 'G53 X420' ],
             penDrop: [ 'G53 Y60', 'G53 X612.8Z-16', 'G53 Y2.6', 'G53 Z-26.3', 'G53 Y60' ]
         },
-        { 
-            color: '#ffa500', 
-            name: 'Orange', 
-            zValue: -33.4, 
-            penPick: [ 'G53 Y60', 'G53 X574.7Z-26.3', 'G53 Y2.8', 'G53 Z-16', 'G53 Y60', 'G53 X420' ],
-            penDrop: [ 'G53 Y60', 'G53 X574.7Z-16', 'G53 Y2.8', 'G53 Z-26.3', 'G53 Y60' ]
-        },
-        { 
-            color: '#ff0000', 
-            name: 'Red', 
-            zValue: -33.4, 
-            penPick: [ 'G53 Y60', 'G53 X536.6Z-26.3', 'G53 Y2.9', 'G53 Z-16', 'G53 Y60', 'G53 X420' ],
-            penDrop: [ 'G53 Y60', 'G53 X536.6Z-16', 'G53 Y2.9', 'G53 Z-26.3', 'G53 Y60' ]
-        },
+        // { 
+        //     color: '#ffa500', 
+        //     name: 'Orange', 
+        //     zValue: -33.4, 
+        //     penPick: [ 'G53 Y60', 'G53 X574.7Z-26.3', 'G53 Y2.8', 'G53 Z-16', 'G53 Y60', 'G53 X420' ],
+        //     penDrop: [ 'G53 Y60', 'G53 X574.7Z-16', 'G53 Y2.8', 'G53 Z-26.3', 'G53 Y60' ]
+        // },
+        // { 
+        //     color: '#ff0000', 
+        //     name: 'Red', 
+        //     zValue: -33.4, 
+        //     penPick: [ 'G53 Y60', 'G53 X536.6Z-26.3', 'G53 Y2.9', 'G53 Z-16', 'G53 Y60', 'G53 X420' ],
+        //     penDrop: [ 'G53 Y60', 'G53 X536.6Z-16', 'G53 Y2.9', 'G53 Z-26.3', 'G53 Y60' ]
+        // },
     ]);
     const [ config, setConfig ] = useState({
         url: window.location.hostname,
