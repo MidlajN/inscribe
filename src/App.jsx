@@ -266,7 +266,7 @@ const Configs = () => {
                     </div>
                   </div>
                 ):(
-                  <div className='w-full h-full flex items-center gap-1 ' onClick={plot}>
+                  <div className='w-full h-full flex items-center gap-1 ' onClick={() => { if (ws && job.connected ) plot() }}>
                     <p className='text-[#fff] text-sm px-9 font-bold tracking-wide'>{ ws && job.connected ? 'Print Now' : 'Connecting'}</p>
                     <div className='border bg-[#116d7e] group-hover:bg-[#116d7e] group-active:bg-[#1e5863] p-3 rounded-md border-[#1a6a79] transition-all duration-500'>
                       <ArrowLeft width={8} height={8} color={'#fff'} />
