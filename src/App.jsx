@@ -66,7 +66,7 @@ function SetUp({ pan, setPan }) {
   const { colors, openSocket, job, ws } = useCom();
   const { canvas, redo, undo } = useCanvas();
 
-  const [ stroke, setStroke ] = useState('#5e5e5e');
+  const [ stroke, setStroke ] = useState('#ffff00');
   const [ tool, setTool ] = useState('Pen');
   const [ streaming, setStreaming ] = useState(false);
 

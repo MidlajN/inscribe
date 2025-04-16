@@ -203,8 +203,8 @@ export const CommunicationProvider = ({ children }) => {
         // },
     ]);
     const [ config, setConfig ] = useState({
-        url: window.location.hostname,
-        // url: 'plotter.local',
+        // url: window.location.hostname,
+        url: 'veliesp.local',
         feedRate: 7000,
         jogSpeed: 10000,
         zOffset: 5,
