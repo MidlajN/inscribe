@@ -33,9 +33,9 @@ function App() {
           className='canvas-container' 
         >
           <TransformWrapper
-            initialScale={0.75} 
+            initialScale={0.2} 
             maxScale={1}
-            minScale={.3} 
+            minScale={.1} 
             panning={ pan ? { excluded: ['fabricCanvas'] } : null }
             centerOnInit 
             limitToBounds={ !pan }
@@ -68,7 +68,7 @@ function SetUp({ pan, setPan }) {
 
   const [ stroke, setStroke ] = useState('#5e5e5e');
   const [ tool, setTool ] = useState('Pen');
-  const [ streaming, setStreaming ] = useState(true);
+  const [ streaming, setStreaming ] = useState(false);
 
   useEditorSetup({ 
     stroke: stroke,
@@ -77,12 +77,12 @@ function SetUp({ pan, setPan }) {
     setPan: setPan
   });
 
-  // useEffect(() => { 
-  //   if (ws) return;
-  //   if (!job.connected) {
-  //     openSocket()
-  //   }
-  // }, [ws, job.connected, openSocket])
+  useEffect(() => { 
+    if (ws) return;
+    if (!job.connected) {
+      openSocket()
+    }
+  }, [ws, job.connected, openSocket])
 
   return (
     <>
@@ -115,7 +115,7 @@ function SetUp({ pan, setPan }) {
           <Eraser width={25} height={25}/>
         </div>
         <div 
-          className='p-2 shadow-inner bg-[#fafafa] hover:bg-[#ebebeb] active:bg-[#fafafa] rounded-full transition-all duration-100 import overflow-hidden'
+          className='p-2 shadow-inner bg-[#fafafa] hover:bg-[#ebebeb] active:bg-[#fafafa] rounded-full transition-all duration-100 import overflow-hidden relative'
           // style={{ borderBottom: tool === 'Eraser' ? '2px solid #ff965b' : null}}
           >
           <input type="file" accept="image/svg+xml"  onInput={ e => handleFile(e.target.files[0], canvas) } />
@@ -164,10 +164,10 @@ function SetUp({ pan, setPan }) {
         { colors.map((color, index) => (
           <div 
             key={index}
-            className='w-6 h-6 rounded-3xl stroke-white'
+            className='w-6 h-6 rounded-3xl border'
             style={{ 
               backgroundColor: color.color, 
-              border: '2px solid white', 
+              // border: '2px solid gray', 
               boxShadow: stroke === color.color ? '#ff965b 0px 0px 1px 3px' : null 
             }}
             onClick={() => {
@@ -210,6 +210,8 @@ const Configs = () => {
       setProgress({ uploading: false, converting: false, progress: 100  });
       setJob({ ...job, started:  true});
     } catch  (err) {
+      setProgress({ uploading: false, converting: false, progress: 0  });
+      setJob({ ...job, started:  false});
       console.log('Error While Uploading : ', err);
     }
   }
@@ -264,7 +266,7 @@ const Configs = () => {
                     </div>
                   </div>
                 ):(
-                  <div className='w-full h-full flex items-center gap-1 ' onClick={() => { if ( ws && job.connected ) plot(); }}>
+                  <div className='w-full h-full flex items-center gap-1 ' onClick={plot}>
                     <p className='text-[#fff] text-sm px-9 font-bold tracking-wide'>{ ws && job.connected ? 'Print Now' : 'Connecting'}</p>
                     <div className='border bg-[#116d7e] group-hover:bg-[#116d7e] group-active:bg-[#1e5863] p-3 rounded-md border-[#1a6a79] transition-all duration-500'>
                       <ArrowLeft width={8} height={8} color={'#fff'} />
@@ -351,7 +353,7 @@ const useEditorSetup= ({stroke, tool, pan, setPan}) => {
       canvas.isDrawingMode = true;
       canvas.freeDrawingBrush = new PencilBrush(canvas);
       canvas.freeDrawingBrush.color = stroke;
-      canvas.freeDrawingBrush.width = 3;
+      canvas.freeDrawingBrush.width = 5;
 
       return () => { 
         canvas.isDrawingMode = false; 
@@ -441,6 +443,13 @@ const VideoStreaming = ({ setStreaming }) => {
     }
   }, [])
 
+  const stopCamera = () => {
+    const stream = videoRef.current?.srcObject;
+    stream?.getTracks().forEach((track) => track.stop());
+    setStreaming(false);
+  };
+
+
   const handleCapture = () => {
     const video = videoRef.current;
     const drawingCanvas = document.createElement('canvas');
@@ -455,12 +464,16 @@ const VideoStreaming = ({ setStreaming }) => {
         canvas.width / img.width,
         canvas.height / img.height
       ); 
+      const offsetX = (canvas.width - img.width * scale) / 2;
+      const offsetY = (canvas.height - img.height * scale) / 2;
 
       img.set({
+        left: offsetX,
+        top: offsetY,
         originX: 'left',
         originY: 'top',
-        left: 0,
-        top: 0,
+        // left: 0,
+        // top: 0,
         scaleX: scale,
         scaleY: scale,
         selectable: false,
@@ -470,6 +483,7 @@ const VideoStreaming = ({ setStreaming }) => {
       canvas.backgroundImage = img;
       canvas.renderAll();
     })
+    stopCamera()
   }
 
 
@@ -481,7 +495,7 @@ const VideoStreaming = ({ setStreaming }) => {
         <div className='flex justify-between items-center rounded-tl-md rounded-tr-md pl-3 pr-2.5 pt-2 bg-white'>
           <p className='text-sm'>Canvas Background</p>
           <button 
-            onClick={() => setStreaming(false)}>
+            onClick={stopCamera}>
             <CloseIcon stroke={'#ff4545'} strokeWidth={2} width={17} height={17} />
           </button>
         </div>

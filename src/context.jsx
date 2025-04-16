@@ -32,8 +32,8 @@ export const CanvasProvider = ({ children }) => {
         FabricObject.ownDefaults.lockRotation = true;
 
         const fabricCanvas = new Canvas(canvasRef.current, {
-            width: util.parseUnit('420mm'),
-            height: util.parseUnit('297mm'),
+            width: util.parseUnit('1500mm'),
+            height: util.parseUnit('1000mm'),
             backgroundColor: 'white',
             fireRightClick: true,
             stopContextMenu: true,
@@ -146,44 +146,46 @@ export const CommunicationProvider = ({ children }) => {
         { 
             color: '#ffff00', 
             name: 'Yellow', 
-            zValue: -33.4, 
-            penPick: [ 'G53 Y50', 'G53 X799.9Z-26.3', 'G53 Y1.2', 'G53 Z-16', 'G53 Y60', 'G53 X420' ],
-            penDrop: [ 'G53 Y50', 'G53 X799.9Z-16', 'G53 Y1.2', 'G53 Z-26.3', 'G53 Y50' ]
+            zValue: 10, 
+            // penPick: [ 'G53 Y50', 'G53 X799.9Z-26.3', 'G53 Y1.2', 'G53 Z-16', 'G53 Y60', 'G53 X420' ],
+            penPick: [ 'M201 o0xffff00' ],
+            // penDrop: [ 'G53 Y50', 'G53 X799.9Z-16', 'G53 Y1.2', 'G53 Z-26.3', 'G53 Y50' ]
+            penDrop: [ 'M205' ]
         },
         { 
-            color: '#008000', 
+            color: '#00ff00', 
             name: 'Green', 
-            zValue: -33.4, 
-            penPick: [ 'G53 Y60', 'G53 X763.3Z-26.3', 'G53 Y1.2', 'G53 Z-16', 'G53 Y60', 'G53 X420' ],
-            penDrop: [ 'G53 Y60', 'G53 X763.3Z-16', 'G53 Y1.2', 'G53 Z-26.3', 'G53 Y60' ]
+            zValue: 10, 
+            penPick: [ 'M201 o0x00ff00' ],
+            penDrop: [ 'M205' ]
         },
         { 
-            color: '#5e5e5e', 
-            name: 'Gray', 
-            zValue: -33.4, 
-            penPick: [ 'G53 Y60', 'G53 X724.8Z-26.3', 'G53 Y1.2', 'G53 Z-16', 'G53 Y60', 'G53 X420' ],
-            penDrop: [ 'G53 Y60', 'G53 X724.8Z-16', 'G53 Y1.2', 'G53 Z-26.3', 'G53 Y60' ]
+            color: '#ffffff', 
+            name: 'White', 
+            zValue: 10, 
+            penPick: [ 'M201 o0xffffff' ],
+            penDrop: [ 'M205' ]
         },
         { 
             color: '#227fe3', 
             name: 'Blue', 
-            zValue: -33.4, 
-            penPick: [ 'G53 Y60', 'G53 X687.3Z-26.3', 'G53 Y1.2', 'G53 Z-16', 'G53 Y60', 'G53 X420' ],
-            penDrop: [ 'G53 Y60', 'G53 X687.3Z-16', 'G53 Y1.2', 'G53 Z-26.3', 'G53 Y60' ] 
+            zValue: 10, 
+            penPick: [ 'M201 o0x227fe3' ],
+            penDrop: [ 'M205' ] 
         },
         { 
             color: '#a020f0', 
             name: 'Purple', 
-            zValue: -33.4, 
-            penPick: [ 'G53 Y60', 'G53 X650.9Z-26.3', 'G53 Y2.6', 'G53 Z-16', 'G53 Y60', 'G53 X420' ],
-            penDrop: [ 'G53 Y60', 'G53 X650.9Z-16', 'G53 Y2.6', 'G53 Z-26.3', 'G53 Y60' ]
+            zValue: 10, 
+            penPick: [ 'M201 o0xa020f0' ],
+            penDrop: [ 'M205' ]
         },
         { 
             color: '#ffc0cb', 
             name: 'Pink', 
-            zValue: -33.4, 
-            penPick: [ 'G53 Y60', 'G53 X612.8Z-26.3', 'G53 Y2.6', 'G53 Z-16', 'G53 Y60', 'G53 X420' ],
-            penDrop: [ 'G53 Y60', 'G53 X612.8Z-16', 'G53 Y2.6', 'G53 Z-26.3', 'G53 Y60' ]
+            zValue: 10, 
+            penPick: [ 'M201 o0xffc0cb' ],
+            penDrop: [ 'M205' ]
         },
         // { 
         //     color: '#ffa500', 
