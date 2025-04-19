@@ -1,5 +1,5 @@
 import './App.css'
-import { Logo, Pen, Eraser, ArrowLeft, ArrowUp, Home, Cross, Report, Pause, Resume, Refresh, Settings, Undo, Redo, MousePointer, DownloadIcon, CameraIcon, CloseIcon } from './icons'
+import { Logo, Pen, Eraser, ArrowLeft, ArrowUp, Home, Cross, Report, Pause, Resume, Refresh, Settings, Undo, Redo, MousePointer, DownloadIcon, CameraIcon, CloseIcon, GCodeIcon } from './icons'
 import useCanvas, { useCom } from './context'
 import { useEffect, useState , useRef } from 'react';
 import { FabricImage, PencilBrush,  } from 'fabric';
@@ -234,6 +234,26 @@ const Configs = () => {
     uploadToMachine(gcodes);
   }
 
+  const downloadGCode = async () => {
+    const groupedObjects = await returnGroupedObjects(canvas);
+    const svgElements = returnSvgElements(groupedObjects, canvas.getWidth(), canvas.getHeight());
+    sortSvgElements(svgElements, colors);
+
+    const gcodes = await convertToGcode(svgElements, colors, config);
+    const blob = new Blob([gcodes.join('\n')], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'veliESP.gcode';
+    a.click();
+    document.body.removeChild(a);
+
+    URL.revokeObjectURL(url)
+  }
+
+
+
   const textareaRef = useRef(null)
 
   useEffect(() => {
@@ -313,6 +333,9 @@ const Configs = () => {
             </div>
             <div className='p-3' onClick={() => { sendToMachine('$X') }}>
               <Cross width={18} height={18} />
+            </div>
+            <div className='p-3' onClick={downloadGCode}>
+              <GCodeIcon width={18} height={18} />
             </div>
             <div className='p-3' onClick={() => { sendToMachine('$Report/interval=50') }}>
               <Report width={18} height={18} />

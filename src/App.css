@@ -59,7 +59,7 @@
   display: flex;
   justify-content: space-between;
   width: 100%;
-  padding: 1rem 1.75rem;
+  padding: 1rem 1rem;
 }
 .machineMsg .buttons div {
   border-radius: 999px;
