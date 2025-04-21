@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-import { loadSVGFromString, util } from 'fabric';
+import { loadSVGFromString, util, ActiveSelection, Group, Path, Line } from 'fabric';
 import ReactDOMServer from 'react-dom/server'
 
 /**
@@ -8,7 +8,7 @@ import ReactDOMServer from 'react-dom/server'
  * @param {File} file - The file to be handled
  * @return {void} 
  */
-export const handleFile = (file, canvas) => {
+export const handleFile = (file, canvas, color) => {
     if (file && file.type !== 'image/svg+xml') return;
   
     const reader = new FileReader();
@@ -19,8 +19,8 @@ export const handleFile = (file, canvas) => {
         console.log(loadedSvg)
         loadedSvg.objects.forEach(obj => {
             obj.set({
-                stroke: '#5e5e5e',
-                strokeWidth: 4,
+                stroke: color,
+                strokeWidth: 10,
                 fill: 'transparent',
             })
         })
@@ -45,36 +45,38 @@ export const handleFile = (file, canvas) => {
  *
  * @return {void} No return value
  */
-export const split = (canvas) => {
+export const split = (canvas, saveState) => {
     const activeObject = canvas.getActiveObject();
     if (!activeObject || activeObject.get('type') === 'activeSelection') return;
+    if (activeObject.isFreeDraw) return;
     let fabricPaths = [];
+    const strokeColor = activeObject.stroke;
 
     const createLine = (x,y, x1, y1) => {
-        const line = new fabric.Line([ x,y, x1, y1 ], {
+        const line = new Line([ x,y, x1, y1 ], {
             selectable: true,
             hasControls: true,
             fill: 'transparent',
-            stroke: 'black',
-            strokeWidth: 1,
+            stroke: strokeColor,
+            strokeWidth: 10,
         });
         fabricPaths.push(line)
     }
 
     const createPath = (path) => {
-        const fabricPath = new fabric.Path(path);
-        fabricPath.set({
+
+        const fabricPath = new Path(path, {
             selectable: true,
             hasControls: true,
             fill: 'transparent',
-            stroke: 'black',
-            strokeWidth: 1,
+            stroke: strokeColor,
+            strokeWidth: 10,
         });
         fabricPaths.push(fabricPath);
     }
     
     if (activeObject.get('type') === 'group') {
-        activeObject.toActiveSelection();
+        canvas.add(...activeObject.removeAll());
         canvas.remove(activeObject);
     } else {
         if (activeObject.path) {
@@ -97,11 +99,12 @@ export const split = (canvas) => {
             }
 
             if (multipleMFound()) {
+                console.log('Multiple M found')
                 let array = [];
                 for (let i = 0; i <= paths.length; i++) {
                     const line = paths[i] ? paths[i].join(' ') : null;
                     const command = paths[i] ? paths[i][0] : null;
-    
+
                     if (command === 'M' || i === paths.length) {
                         if (array.length) mainArray.push(array.join(' '));
                         array = []
@@ -114,24 +117,32 @@ export const split = (canvas) => {
                     }
                 }
             } else {
+                console.log('Single M', paths)
                 let lastX = 0;
                 let lastY = 0;
+                let mainMX = 0;
+                let mainMY = 0;
                 for (let i = 0; i < paths.length; i++) {
                     const command = paths[i][0];
-                    let newLine = '';
-            
+                    let newLine = null;
+
                     if (command === 'M') {
                         // Move command (start new contour)
                         lastX = paths[i][1];
                         lastY = paths[i][2];
-                        newLine = `M ${lastX} ${lastY}`;
+                        mainMX = paths[i][1];
+                        mainMY = paths[i][2];
+
+                    } else if (command === 'Z') {
+                        if (mainMX === lastX && mainMY === lastY) continue
+                        newLine = `M ${lastX} ${lastY} L ${mainMX} ${mainMY}`
                     } else {
                         newLine = `M ${lastX} ${lastY} ${paths[i].join(' ')}`;
                         lastX = paths[i][paths[i].length - 2];
                         lastY = paths[i][paths[i].length - 1];
                     }
 
-                    createPath(newLine);
+                    if (newLine) createPath(newLine);
                 }
             }
         } else if (activeObject.type === 'rect') {
@@ -178,32 +189,61 @@ export const split = (canvas) => {
         }
 
         if (fabricPaths.length > 0) {
-            const selection = new fabric.ActiveSelection(fabricPaths, { canvas: canvas });
-            selection.set({
-                top: activeObject.top,
+            canvas.off('object:added', saveState);
+
+            // fabricPaths.forEach(obj => {
+            //     console.log(
+            //         'Object : ', obj
+            //     )
+            // })
+            // fabricPaths = fabricPaths.filter(obj => (obj.width !== 0 || obj.height !== 0))
+
+            const group = new Group(fabricPaths);
+            group.set({
+                originX: 'center',
+                originY: 'center',
                 left: activeObject.left,
+                top: activeObject.top,
                 scaleX: activeObject.scaleX,
                 scaleY: activeObject.scaleY,
-                angle: activeObject.angle
-            });
+                angle: activeObject.angle,
+            })
+            group.setCoords()
 
-            console.log('Selection : ', selection)
-            canvas.discardActiveObject();
-            selection.toActiveSelection();
+            const objects = [...group.removeAll()];
+            console.log(
+                'Group : ', group,
+                '\nObjects : ', objects
+            )
+            canvas.add(...objects)
             canvas.remove(activeObject);
+            canvas.on('object:added', saveState);
         }
     }
     canvas.renderAll();
 }
 
 
+
 /**
  * Function to group selected objects together.
  */
-export const group = (canvas) => {
+export const group = (canvas, saveState) => {
     const activeObject = canvas.getActiveObject();
-    if (!activeObject || activeObject.get('type') !== 'activeSelection') return;
-    activeObject.toGroup();
+    const objects = activeObject.getObjects();
+    if (!activeObject || activeObject.get('type') !== 'activeselection') return;
+
+    canvas.off('object:removed', saveState);
+    objects.forEach(obj => canvas.remove(obj));
+    canvas.discardActiveObject();
+    const group = new Group(objects, {
+        subTargetCheck: true,
+        // interactive: true
+    });
+    canvas.add(group);
+    canvas.setActiveObject(group);
+    canvas.on('object:removed', saveState);
+    
     canvas.renderAll();
 }
 
@@ -217,11 +257,11 @@ export const copyObject = (setCopiedObject, canvas) => {
     if (canvas) {
         const activeObject = canvas.getActiveObject();
         if (activeObject) {
-            activeObject.clone((clonedObject) => {
+            activeObject.clone().then((clonedObject) => {
                 canvas.discardActiveObject();
                 setCopiedObject(clonedObject);
                 console.log('Object copied', );
-            });
+            })
         } else {
             console.log('No object selected to copy');
         }
@@ -238,7 +278,7 @@ export const copyObject = (setCopiedObject, canvas) => {
 export const pasteObject = (copiedObject, canvas) => {
 
     if (copiedObject) {
-        copiedObject.clone((clonedObject) => {
+        copiedObject.clone().then((clonedObject) => {
 
             clonedObject.set({
                 left: clonedObject.left + 10,
@@ -246,7 +286,7 @@ export const pasteObject = (copiedObject, canvas) => {
                 evented: true,
             });
 
-            if (clonedObject.get('type') === 'activeSelection') {
+            if (clonedObject.get('type') === 'activeselection') {
                 clonedObject.canvas = canvas;
                 clonedObject.forEachObject((obj) => {
                     canvas.add(obj);
@@ -273,7 +313,7 @@ export const pasteObject = (copiedObject, canvas) => {
 export const deleteObject = (canvas) => {
     if (canvas && canvas.getActiveObject()) {
         const activeObject = canvas.getActiveObject();
-        if (activeObject.get('type') === 'activeSelection') {
+        if (activeObject.get('type') === 'activeselection') {
             activeObject.forEachObject((obj) => {
                 canvas.remove(obj);
             });
@@ -295,30 +335,38 @@ export const selectAllObject = (canvas) => {
 
     canvas.discardActiveObject();
     const objects = canvas.getObjects().filter(obj => obj.get('name') !== 'ToolHead');
-    const selection = new fabric.ActiveSelection(objects, { canvas: canvas });
+    const selection = new ActiveSelection(objects, { canvas: canvas });
     canvas.setActiveObject(selection);
     canvas.requestRenderAll();
 }
 
 
 export const handleKeyDown = ( copiedObject, setCopiedObject, canvas ) => (e) => {
-    if (e.ctrlKey && e.key === 'c') {
+    const keyStroke = e.key.toLowerCase();
+    const activeElement = document.activeElement;
+
+    if (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA' ) return
+
+    if (e.ctrlKey && keyStroke === 'c') {
         copyObject(setCopiedObject, canvas);
-    } else if (e.ctrlKey && e.key === 'v') {
-        pasteObject(copiedObject, canvas);
-    } else if (e.key === 'Delete') {
+    } else if (e.ctrlKey && keyStroke === 'v') {
+        pasteObject(copiedObject, setCopiedObject, canvas);
+    } else if (keyStroke === 'delete' || keyStroke === 'backspace') {
         deleteObject(canvas);
-    } else if (e.ctrlKey && e.key === 'a') {
+    } else if (e.ctrlKey && keyStroke === 'a') {
         selectAllObject(canvas);
         e.preventDefault();
-    } else if (e.ctrlKey && e.key === 'g') {
+    }else if (e.ctrlKey && keyStroke === 'g' && e.shiftKey) {
+        split(canvas);
+        e.preventDefault();
+    } else if (e.ctrlKey && keyStroke === 'g') {
         group(canvas);
         e.preventDefault();
-    } else if (e.ctrlKey && e.key === 'z') {
-        canvas.undo();
+    } else if (e.ctrlKey && keyStroke === 'z') {
+        undo()
         e.preventDefault();
-    } else if (e.ctrlKey && e.key === 'y') {
-        canvas.redo();
+    } else if (e.ctrlKey && keyStroke === 'y') {
+        redo()
         e.preventDefault();
     }
 };

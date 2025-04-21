@@ -170,8 +170,14 @@ export const convertToGcode = async (svgElements, colors, config) => {
 
         // const filteredGcodes = gCodeLines.filter(command => (command !== `G1 F${config.feedRate}` && !command.startsWith('G0 Z')));
         const filteredGcodes = gCodeLines.filter(command => (command !== `G1 F${config.feedRate}`));
+
+        function hexToDecimal(hex) {
+            hex = hex.replace(/^#/, '');
+            return parseInt(hex, 16);
+        }
+
         const newCode = filteredGcodes.map(command => {
-            if (command === `G0 Z${color.zValue}`) return color.penPick.join('\n')
+            if (command === `G0 Z${color.zValue}`) return `${color.penPick.join('')}${hexToDecimal(color.color)}`
             else if (command === `G0 Z${ color.zValue - config.zOffset }`) return color.penDrop.join('\n')
             else return command
         })

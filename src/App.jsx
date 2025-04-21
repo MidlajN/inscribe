@@ -67,7 +67,7 @@ function SetUp({ pan, setPan }) {
   const { canvas, redo, undo } = useCanvas();
 
   const [ stroke, setStroke ] = useState('#ffff00');
-  const [ tool, setTool ] = useState('Pen');
+  const [ tool, setTool ] = useState('Select');
   const [ streaming, setStreaming ] = useState(false);
 
   useEditorSetup({ 
@@ -84,74 +84,96 @@ function SetUp({ pan, setPan }) {
     }
   }, [ws, job.connected, openSocket])
 
+  const Label = ({ label }) => (
+    <div
+      className={`
+        absolute z-10 rounded-md px-3 py-1 bg-[#464c5b] shadow text-white  text-sm invisible opacity-20 
+        lg:translate-y-0 left-1/2 -translate-x-1/2 group-hover:-translate-y-1 transition-all
+        group-hover:visible group-hover:opacity-100 lg:group-hover:translate-y-9  group-hover:delay-200
+        before:absolute before:content-[''] before:-top-1/2 before:-translate-x-1/2 before:left-1/2
+        before:border-[6px] before:border-transparent before:border-b-[#464c5b] text-nowrap
+      `}
+    >
+      { label }
+    </div>
+  )
+
   return (
     <>
       <div className='setup'>
         <div
-          className='p-0.5'
+          className='p-0.5 relative group'
           style={{ borderBottom: tool === 'Select' ? '2px solid #ff965b' : null}}
           onClick={() => {
             setTool('Select');
           }}
         >
             <MousePointer width={25} height={25}/>
+            <Label label={'Select'} />
         </div>
         <div
-          className='p-0.5'
+          className='p-0.5 relative group'
           style={{ borderBottom: tool === 'Pen' ? '2px solid #ff965b' : null}}
           onClick={() => {
             setTool('Pen');
           }}
           >
           <Pen width={25} height={25}/>
+          <Label label={'Pen'} />
         </div>
         <div 
-          className='p-0.5'
+          className='p-0.5 relative group'
           style={{ borderBottom: tool === 'Eraser' ? '2px solid #ff965b' : null}}
           onClick={() => {
             setTool('Eraser');
           }}
           >
           <Eraser width={25} height={25}/>
+          <Label label={'Eraser'} />
         </div>
         <div 
-          className='p-2 shadow-inner bg-[#fafafa] hover:bg-[#ebebeb] active:bg-[#fafafa] rounded-full transition-all duration-100 import overflow-hidden relative'
+          className='p-2 shadow-inner bg-[#fafafa] hover:bg-[#ebebeb] active:bg-[#fafafa] rounded-full transition-all duration-100 import  relative group'
           // style={{ borderBottom: tool === 'Eraser' ? '2px solid #ff965b' : null}}
           >
-          <input type="file" accept="image/svg+xml"  onInput={ e => handleFile(e.target.files[0], canvas) } />
+          <input type="file" accept="image/svg+xml"  onInput={ e => handleFile(e.target.files[0], canvas, stroke) } />
           <DownloadIcon width={23} height={23}/>
+          <Label label={'Import SVG'} />
         </div>
         <div 
-          className='p-2 shadow-inner bg-[#fafafa] hover:bg-[#ebebeb] active:bg-[#fafafa] rounded-full transition-all duration-100'
+          className='p-2 shadow-inner bg-[#fafafa] hover:bg-[#ebebeb] active:bg-[#fafafa] rounded-full transition-all duration-100 relative group'
           onClick={undo}
           >
           <Undo width={25} height={25}/>
+          <Label label={'Undo'} />
         </div>
         <div 
-          className='p-2 shadow-inner bg-[#fafafa] hover:bg-[#ebebeb] active:bg-[#fafafa] rounded-full transition-all duration-100'
+          className='p-2 shadow-inner bg-[#fafafa] hover:bg-[#ebebeb] active:bg-[#fafafa] rounded-full transition-all duration-100 relative group'
           onClick={redo}
           >
           <Redo width={25} height={25}/>
+          <Label label={'Redo'} />
         </div>
         <div 
-          className='p-3 shadow-inner bg-[#fafafa] hover:bg-[#ebebeb] active:bg-[#fafafa] rounded-full transition-all duration-100'
+          className='p-3 shadow-inner bg-[#fafafa] hover:bg-[#ebebeb] active:bg-[#fafafa] rounded-full transition-all duration-100 relative group'
           onClick={() => {
             canvas.getObjects().forEach((obj) => {
               if (obj.get('name') !== 'ToolHead' && obj.get('name') !== 'BedSize') {
                 canvas.remove(obj);
               }
             });
-            canvas.backgroundImage = '#ffffff'
+            canvas.backgroundImage = null
             canvas.renderAll();
           }}
           >
           <Refresh width={20} height={20} />
+          <Label label={'Start Over'} />
         </div>
         <div 
-          className='p-3 bg-[#fafafa] hover:bg-[#ebebeb] active:bg-[#fafafa] rounded-full transition-all duration-100'
+          className='p-3 bg-[#fafafa] hover:bg-[#ebebeb] active:bg-[#fafafa] rounded-full transition-all duration-100 relative group'
           onClick={() => setStreaming(true)}
           >
           <CameraIcon width={20} height={20} />
+          <Label label={'Set Background'} />
         </div>
         {/* <div 
           className='p-0.5'
