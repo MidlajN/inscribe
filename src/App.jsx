@@ -1,5 +1,5 @@
 import './App.css'
-import { Logo, Pen, Eraser, ArrowLeft, ArrowUp, Home, Cross, Report, Pause, Resume, Refresh, Settings, Undo, Redo, MousePointer, DownloadIcon, CameraIcon, CloseIcon, GCodeIcon } from './icons'
+import { Logo, Pen, Eraser, ArrowLeft, ArrowUp, Home, Cross, Report, Pause, Resume, Refresh, Settings, Undo, Redo, MousePointer, DownloadIcon, CameraIcon, CloseIcon, GCodeIcon, ImageUpICon } from './icons'
 import useCanvas, { useCom } from './context'
 import { useEffect, useState , useRef } from 'react';
 import { FabricImage, PencilBrush,  } from 'fabric';
@@ -141,6 +141,7 @@ function SetUp({ pan, setPan }) {
                 canvas.remove(obj);
               }
             });
+            canvas.backgroundImage = '#ffffff'
             canvas.renderAll();
           }}
           >
@@ -472,16 +473,7 @@ const VideoStreaming = ({ setStreaming }) => {
     setStreaming(false);
   };
 
-
-  const handleCapture = () => {
-    const video = videoRef.current;
-    const drawingCanvas = document.createElement('canvas');
-    drawingCanvas.width = video.videoWidth;
-    drawingCanvas.height = video.videoHeight;
-    const ctx = drawingCanvas.getContext('2d');
-    ctx.drawImage(video, 0,0, drawingCanvas.width, drawingCanvas.height);
-    const dataUrl = drawingCanvas.toDataURL('image/png');
-
+  const setBackground = (dataUrl) => {
     FabricImage.fromURL(dataUrl).then((img) => {
       const scale = Math.min(
         canvas.width / img.width,
@@ -505,8 +497,22 @@ const VideoStreaming = ({ setStreaming }) => {
 
       canvas.backgroundImage = img;
       canvas.renderAll();
-    })
+    });
+
     stopCamera()
+  }
+
+
+  const handleCapture = () => {
+    const video = videoRef.current;
+    const drawingCanvas = document.createElement('canvas');
+    drawingCanvas.width = video.videoWidth;
+    drawingCanvas.height = video.videoHeight;
+    const ctx = drawingCanvas.getContext('2d');
+    ctx.drawImage(video, 0,0, drawingCanvas.width, drawingCanvas.height);
+    const dataUrl = drawingCanvas.toDataURL('image/png');
+
+    setBackground(dataUrl)
   }
 
 
@@ -522,7 +528,7 @@ const VideoStreaming = ({ setStreaming }) => {
             <CloseIcon stroke={'#ff4545'} strokeWidth={2} width={17} height={17} />
           </button>
         </div>
-        <div className="p-3 bg-white text-center rounded-bl-md rounded-br-md">
+        <div className="p-3 bg-white text-center">
           <video 
             className='rounded'
             ref={videoRef} 
@@ -530,11 +536,30 @@ const VideoStreaming = ({ setStreaming }) => {
             playsInline 
             style={{ width: '100%' }} />
           <button 
-            className='bg-teal-500 flex justify-center items-center gap-1 px-2 py-1 text-sm font-medium tracking-wide text-white mx-auto rounded mt-2 mb-3'
+            className='bg-teal-500 flex justify-center items-center gap-1 px-2 py-1 text-sm font-medium tracking-wide text-white mx-auto rounded mt-2'
             onClick={handleCapture}>
             <CameraIcon stroke={'#ffffff'} strokeWidth={2} width={17} height={17} />
             Take Picture
           </button>
+        </div>
+        <div className="p-6 flex justify-center gap-3 items-center bg-white text-center rounded-bl-md rounded-br-md import overflow-hidden relative">
+          <input 
+            type="file" 
+            accept="image/png, image/jpeg, image/jpg" 
+            onInput={ (e) => {
+              if (e.target.files.length > 0) {
+                const svgFile = e.target.files[0];
+                const url = URL.createObjectURL(svgFile);
+                
+                setBackground(url)
+              }
+            }} />
+          <div 
+            className='p-4 border rounded-full w-fit'
+            onClick={handleCapture}>
+            <ImageUpICon stroke={'#000'} strokeWidth={2} width={17} height={17} />
+          </div>
+          <p className='text-sm tracking-wide font-medium text-gray-700'>Upload From Desktop</p>
         </div>
       </div>
     </>

@@ -25,15 +25,15 @@ export const CanvasProvider = ({ children }) => {
         FabricObject.ownDefaults.cornerStyle = 'circle';
         FabricObject.ownDefaults.cornerColor = '#7f77eb85';
         FabricObject.ownDefaults.transparentCorners = false;
-        FabricObject.ownDefaults.cornerSize = 5;
+        FabricObject.ownDefaults.cornerSize = 30;
         FabricObject.ownDefaults.borderScaleFactor = 2;
         FabricObject.ownDefaults.noScaleCache = true;
         FabricObject.ownDefaults.borderDashArray = [10];
         FabricObject.ownDefaults.lockRotation = true;
 
         const fabricCanvas = new Canvas(canvasRef.current, {
-            width: util.parseUnit('1500mm'),
-            height: util.parseUnit('1000mm'),
+            width: util.parseUnit('1400mm'),
+            height: util.parseUnit('900mm'),
             backgroundColor: 'white',
             fireRightClick: true,
             stopContextMenu: true,
