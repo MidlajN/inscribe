@@ -6,11 +6,13 @@ import { FabricImage, PencilBrush,  } from 'fabric';
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 import { convertToGcode, returnGroupedObjects, returnSvgElements, sortSvgElements } from './convert';
 import { handleFile } from './functions';
+import { ManageColors } from './ColorModal';
 
 function App() { 
   const { canvasRef } = useCanvas();
   const { job } = useCom();
   const [ pan, setPan ] = useState(false);
+
 
   return (
     <>
@@ -69,6 +71,7 @@ function SetUp({ pan, setPan }) {
   const [ stroke, setStroke ] = useState('#ffff00');
   const [ tool, setTool ] = useState('Select');
   const [ streaming, setStreaming ] = useState(false);
+  const [ isOpen, setIsOpen ] = useState(false);
 
   useEditorSetup({ 
     stroke: stroke,
@@ -84,6 +87,7 @@ function SetUp({ pan, setPan }) {
     }
   }, [ws, job.connected, openSocket])
 
+  // eslint-disable-next-line react/prop-types
   const Label = ({ label }) => (
     <div
       className={`
@@ -199,6 +203,13 @@ function SetUp({ pan, setPan }) {
           >
           </div>
         ))}
+        <div 
+          className='p-3 hover:bg-[#ebebeb] active:bg-[#fafafa] rounded-full transition-all duration-100 relative'
+          onClick={() => setIsOpen(true)}
+        >
+          <Settings strokeColor="#000" width={20} height={20} />
+          <ManageColors setIsOpen={setIsOpen} isOpen={isOpen} />
+        </div>
       </div>
       { streaming && <VideoStreaming setStreaming={setStreaming} /> }
       <Configs /> 
