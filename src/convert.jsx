@@ -4,84 +4,27 @@ import { Converter } from "svg-to-gcode";
 // import { ActiveSelection, Canvas, Group, StaticCanvas, util } from "fabric";
 
 // TO FIX 
-const returnObjs = (objects) => {
-    const newObjects = []
-    objects.forEach(obj => {
-        if (obj.get('name') !== 'ToolHead' && obj.get('name') !== 'BedSize') {
-            newObjects.push(obj)
-        }
-    })
+const returnObjs = async (objects) => {
+    const clonedObjs = await Promise.all(
+        objects
+            .filter((obj) => obj.get('name') !== 'ToolHead' && obj.get('name') !== 'BedSize' && obj.get('name') !== 'background')
+            .map(((obj) => obj.clone()))
+    );
 
-    return newObjects
+    return clonedObjs.flatMap( (obj) => obj.type === 'group' ? obj.removeAll() : obj )
 }
 
 export const returnGroupedObjects = async (canvas) => {
-
-    // const bedCanvas = new Canvas(null, {
-    //     width: util.parseUnit('420mm'),
-    //     height: util.parseUnit('297mm'),
-    //     backgroundColor: 'white',
-    // })
-
-    // const objects = canvas.getObjects().map(obj => obj.clone());
-    // Promise.all(objects).then(clonedObjs => {
-    //     console.log('CLoned Object s  : ', clonedObjs)
-        
-    // }).catch(err => {
-    //     console.log('Error Occured Here : ', err)
-    //     return {}
-    // })
-
-    // const clonedObjs = await Promise.all(canvas.getObjects().map(obj => obj.clone()));
-    // if (clonedObjs.length > 0) {
-    //     const group = new Group(clonedObjs);
-    //     group.set({
-    //         left: bedCanvas.width / 2 - group.width / 2,
-    //         top: bedCanvas.height / 2 - group.height / 2,
-    //     })
-
-    //     const selection = new ActiveSelection(clonedObjs, {
-    //         canvas: bedCanvas,
-    //         left: bedCanvas.width / 2 - group.width / 2,
-    //         top: bedCanvas.height / 2 - group.height / 2,
-    //         stroke:'#5e5e5e'
-    //     })
-    //     // console.log('Canvas Selection : ', selection);
-
-    //     bedCanvas.add(selection);
-    //     // bedCanvas.add(group);
-    //     // bedCanvas.renderAll();
-    //     selection.dispose();
-    //     clonedObjs.forEach(obj => {
-    //         // Position the object if necessary, or it will retain the position set in the active selection
-    //         bedCanvas.add(obj);
-    //     });
-        
-    //     bedCanvas.renderAll()
-
-    //     return returnObjs(bedCanvas.getObjects()).reduce((acc, object) => {
-    //         const stroke = tinycolor(object.stroke).toHexString();
-    //         acc[stroke] = acc[stroke] || [];
-    //         // if (!acc[stroke]) acc[stroke] = [];
-    //         acc[stroke].push(object)
-    //         return acc
-    //     }, {});
-    // } else {
-    //     console.log('No Object to clone and group')
-    //     return {}
-    // }
-
-    
-    // group.toActiveSelection();
-
-    return returnObjs(canvas.getObjects()).reduce((acc, object) => {
+    canvas.discardActiveObject();
+    canvas.renderAll();
+    const objects = await returnObjs(canvas.getObjects());
+    return objects.reduce((acc, object) => {
+        // console.log('Object : ', object, ' Stroke : ' ,object.stroke)
         const stroke = tinycolor(object.stroke).toHexString();
         acc[stroke] = acc[stroke] || [];
-        // if (!acc[stroke]) acc[stroke] = [];
         acc[stroke].push(object)
         return acc
     }, {});
-    
 }
 
 
@@ -91,10 +34,8 @@ export const returnSvgElements = (objects, width, height) => {
     for (const stroke in objects) {
         let groupSVG = '';
         if (objects[stroke].length > 1) {
-
             objects[stroke].forEach(obj => {
                 const svg = obj.toSVG();
-                console.log('SVG FROM G : ', svg);
                 groupSVG += svg;
             });
         } else {
@@ -110,12 +51,12 @@ export const returnSvgElements = (objects, width, height) => {
             color : stroke,
             svg : svg.outerHTML
         }
-        console.log('Svg to Be PUSHED :', svg)
         svgElements.push(data);
     }
 
     return svgElements
 }
+
 
 export const sortSvgElements = (svgElements, colors) => {
     const colorOrder = colors.reduce((acc, colorObject, index) => {
